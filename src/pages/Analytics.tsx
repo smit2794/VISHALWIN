@@ -466,7 +466,10 @@ export const Analytics: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                 <XAxis dataKey="name" stroke={labelColor} fontSize={9} />
                 <YAxis stroke={labelColor} fontSize={9} unit="L" />
-                <Tooltip {...tooltipStyle} formatter={(val: number) => [`₹${val}L`, 'Amount']} />
+                <Tooltip
+  {...tooltipStyle}
+  formatter={(val) => [`₹${val ?? 0}L`, 'Amount']}
+/>
                 <Area type="monotone" dataKey="Amount" stroke="#10B981" strokeWidth={2.5} fill="url(#gradSponsor)" />
               </AreaChart>
             </ResponsiveContainer>
