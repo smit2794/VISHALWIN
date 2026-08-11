@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
+import { RenuStore } from'../data/renuStore';
 import { Child, Diagnosis, FollowUp, Sponsorship, Coordinator } from'../types';
-import { Card, Badge, Button, Select, Label } from'../components/ui';
-import { useRole } from'../hooks/useRole';
-import { showToast } from'../hooks/useToast';
+import { Card, Badge, Button, Select, Label } from'../../../components/ui';
+import { useRole } from'../../../hooks/useRole';
+import { showToast } from'../../../hooks/useToast';
 import { Printer, GraduationCap, Award, MapPin, Phone, Clock } from'lucide-react';
 
 export const Reports: React.FC = () => {

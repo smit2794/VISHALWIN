@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
+import { RenuStore } from'../data/renuStore';
 import { TherapyCentre, Child, Diagnosis } from'../types';
-import { Card, Badge, Button, Drawer, Label } from'../components/ui';
+import { Card, Badge, Button, Drawer, Label } from'../../../components/ui';
 import { Building2, Phone, User, CheckCircle, MapPin, Sparkles, ChevronRight, Activity, TrendingUp, Award, Coins } from'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from'recharts';
 

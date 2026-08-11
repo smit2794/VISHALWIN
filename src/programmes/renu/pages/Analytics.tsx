@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { RenuStore } from '../data/mockData';
-import { Card, Badge, Tabs } from '../components/ui';
-import { RenuJourneyTracker, JOURNEY_STEPS } from '../components/common/RenuJourneyTracker';
+import { RenuStore } from '../data/renuStore';
+import { Card, Badge, Tabs } from '../../../components/ui';
+import { RenuJourneyTracker, JOURNEY_STEPS } from '../../../components/common/RenuJourneyTracker';
 import { TrendingUp, Award, Calendar, Coins, Users, Sparkles, Activity, Clock, GraduationCap, Heart, Building2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {

@@ -1,8 +1,8 @@
 import React from'react';
-import { RenuStore } from'../data/mockData';
-import { useRole } from'../hooks/useRole';
-import { showToast } from'../hooks/useToast';
-import { Card, Badge, Button, Label, Select } from'../components/ui';
+import { RenuStore } from'../../programmes/renu/data/renuStore';
+import { useRole } from'../../hooks/useRole';
+import { showToast } from'../../hooks/useToast';
+import { Card, Badge, Button, Label, Select } from'../../components/ui';
 import { RefreshCw, UserCheck, BellRing } from'lucide-react';
 
 export const Settings: React.FC = () => {

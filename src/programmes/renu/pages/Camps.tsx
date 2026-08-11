@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
-import { useRole } from'../hooks/useRole';
-import { showToast } from'../hooks/useToast';
+import { RenuStore } from'../data/renuStore';
+import { useRole } from'../../../hooks/useRole';
+import { showToast } from'../../../hooks/useToast';
 import { Camp, Coordinator, Child } from'../types';
-import { Card, Badge, Button, Input, Select, Label, Modal, Drawer } from'../components/ui';
+import { Card, Badge, Button, Input, Select, Label, Modal, Drawer } from'../../../components/ui';
 import { Search, Filter, Plus, Calendar, MapPin, User, Stethoscope, ArrowUpDown, ChevronRight, Edit } from'lucide-react';
-import EmptyState from'../components/common/EmptyState';
+import EmptyState from'../../../components/common/EmptyState';
 
 export const Camps: React.FC = () => {
  const { role, isAdmin } = useRole();
@@ -46,6 +46,10 @@ export const Camps: React.FC = () => {
  followUpsRequiredCount: 0
  });
 
+ // Additional Drawer State
+ const [newTeamMember, setNewTeamMember] = useState({ role: 'Volunteer', name: '', mobile: '' });
+ const [newIEC, setNewIEC] = useState({ name: '', quantity: 1, status: 'Ordered' });
+
  useEffect(() => {
  loadData();
  
@@ -58,7 +62,8 @@ export const Camps: React.FC = () => {
 
  const loadData = () => {
  setCamps(RenuStore.getCamps());
- setCoordinators(RenuStore.getCoordinators());
+ const coords = RenuStore.getCoordinators();
+ setCoordinators(coords);
  setChildren(RenuStore.getChildren());
  };
 
@@ -107,6 +112,77 @@ export const Camps: React.FC = () => {
  const getCampChildren = (campId: string) => {
  return children.filter(c => c.campId === campId);
  };
+
+ const updateSelectedCampInStore = (updatedCamp: Camp) => {
+    const updatedCamps = camps.map(c => c.id === updatedCamp.id ? updatedCamp : c);
+    RenuStore.saveCamps(updatedCamps);
+    setCamps(updatedCamps);
+    setSelectedCamp(updatedCamp);
+    window.dispatchEvent(new Event('renu_data_updated'));
+  };
+
+  const handleAddTeamMember = () => {
+    if (!selectedCamp || !newTeamMember.name) return;
+    const updated = {
+      ...selectedCamp,
+      teamMembers: [...(selectedCamp.teamMembers || []), { id: Date.now().toString(), ...newTeamMember } as any]
+    };
+    updateSelectedCampInStore(updated);
+    setNewTeamMember({ role: 'Volunteer', name: '', mobile: '' });
+    showToast('Team Member Added', 'success');
+  };
+
+  const handleDeleteTeamMember = (id: string) => {
+    if (!selectedCamp) return;
+    const updated = {
+      ...selectedCamp,
+      teamMembers: (selectedCamp.teamMembers || []).filter(t => t.id !== id)
+    };
+    updateSelectedCampInStore(updated);
+    showToast('Team Member Removed', 'info');
+  };
+
+  const handleAddIEC = () => {
+    if (!selectedCamp || !newIEC.name) return;
+    const updated = {
+      ...selectedCamp,
+      iecMaterials: [...(selectedCamp.iecMaterials || []), { id: Date.now().toString(), ...newIEC } as any]
+    };
+    updateSelectedCampInStore(updated);
+    setNewIEC({ name: '', quantity: 1, status: 'Ordered' });
+    showToast('IEC Material Added', 'success');
+  };
+
+  const handleDeleteIEC = (id: string) => {
+    if (!selectedCamp) return;
+    const updated = {
+      ...selectedCamp,
+      iecMaterials: (selectedCamp.iecMaterials || []).filter(i => i.id !== id)
+    };
+    updateSelectedCampInStore(updated);
+    showToast('IEC Material Removed', 'info');
+  };
+
+  const handleMockUploadIEC = (id: string) => {
+    if (!selectedCamp) return;
+    const updated = {
+      ...selectedCamp,
+      iecMaterials: (selectedCamp.iecMaterials || []).map(i => i.id === id ? { ...i, sampleFileName: 'sample_material.pdf' } : i)
+    };
+    updateSelectedCampInStore(updated);
+    showToast('Sample Uploaded', 'success');
+  };
+
+  const handleMockUploadDoc = (type: 'report' | 'photos') => {
+    if (!selectedCamp) return;
+    const updated = {
+      ...selectedCamp,
+      reportDocumentStatus: type === 'report' ? 'Uploaded (camp_report.pdf)' : selectedCamp.reportDocumentStatus,
+      photosDocumentStatus: type === 'photos' ? 'Uploaded (camp_photos.zip)' : selectedCamp.photosDocumentStatus
+    };
+    updateSelectedCampInStore(updated);
+    showToast('Document Uploaded', 'success');
+  };
 
  // Submit Add Form
  const handleAddSubmit = (e: React.FormEvent) => {
@@ -520,6 +596,92 @@ export const Camps: React.FC = () => {
  </div>
  )}
  </div>
+
+ {/* Camp Team */}
+  <div>
+    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Camp Team</h4>
+    <div className="space-y-2 mb-3">
+      {(selectedCamp.teamMembers || []).map(member => (
+        <div key={member.id} className="flex justify-between items-center p-2 border border-slate-200 rounded text-xs bg-slate-50">
+          <div>
+            <span className="font-bold">{member.name}</span> <span className="text-slate-500">({member.role})</span>
+            <div className="text-[10px] text-slate-400">{member.mobile}</div>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => handleDeleteTeamMember(member.id)} className="h-6 text-[10px] py-0 px-2 cursor-pointer text-red-600 border-red-200 hover:bg-red-50">Delete</Button>
+        </div>
+      ))}
+    </div>
+    <div className="flex gap-2 items-end">
+      <div className="flex-1">
+        <Select 
+          options={['Pediatrician', 'Neurologist', 'Therapist', 'Volunteer', 'Coordinator'].map(r => ({label: r, value: r}))} 
+          value={newTeamMember.role} onChange={e => setNewTeamMember({...newTeamMember, role: e.target.value as any})} 
+        />
+      </div>
+      <div className="flex-1">
+        <Input placeholder="Name" value={newTeamMember.name} onChange={e => setNewTeamMember({...newTeamMember, name: e.target.value})} />
+      </div>
+      <div className="flex-1">
+        <Input placeholder="Mobile" value={newTeamMember.mobile} onChange={e => setNewTeamMember({...newTeamMember, mobile: e.target.value})} />
+      </div>
+      <Button size="sm" onClick={handleAddTeamMember} className="cursor-pointer">Add</Button>
+    </div>
+  </div>
+
+  {/* IEC Materials */}
+  <div>
+    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">IEC Materials</h4>
+    <div className="space-y-2 mb-3">
+      {(selectedCamp.iecMaterials || []).map(iec => (
+        <div key={iec.id} className="flex justify-between items-center p-2 border border-slate-200 rounded text-xs bg-slate-50">
+          <div>
+            <span className="font-bold">{iec.name}</span> <span className="text-slate-500">(Qty: {iec.quantity})</span> - <Badge color="primary" className="scale-75 origin-left py-0">{iec.status}</Badge>
+            {iec.sampleFileName && <div className="text-[10px] text-brand-success mt-0.5">Sample: {iec.sampleFileName}</div>}
+          </div>
+          <div className="flex gap-2">
+            {!iec.sampleFileName && <Button variant="outline" size="sm" onClick={() => handleMockUploadIEC(iec.id)} className="h-6 text-[10px] py-0 px-2 cursor-pointer">Upload Sample</Button>}
+            <Button variant="outline" size="sm" onClick={() => handleDeleteIEC(iec.id)} className="h-6 text-[10px] py-0 px-2 cursor-pointer text-red-600 border-red-200 hover:bg-red-50">Delete</Button>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="flex gap-2 items-end">
+      <div className="flex-1">
+        <Input placeholder="Item Name" value={newIEC.name} onChange={e => setNewIEC({...newIEC, name: e.target.value})} />
+      </div>
+      <div className="w-20">
+        <Input type="number" placeholder="Qty" value={newIEC.quantity} onChange={e => setNewIEC({...newIEC, quantity: Number(e.target.value)})} />
+      </div>
+      <div className="flex-1">
+        <Select 
+          options={['Ordered', 'Ready', 'Distributed'].map(r => ({label: r, value: r}))} 
+          value={newIEC.status} onChange={e => setNewIEC({...newIEC, status: e.target.value as any})} 
+        />
+      </div>
+      <Button size="sm" onClick={handleAddIEC} className="cursor-pointer">Add</Button>
+    </div>
+  </div>
+
+  {/* Camp Documents */}
+  <div>
+    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Camp Documents</h4>
+    <div className="grid grid-cols-2 gap-4">
+      <div className="p-3 border border-slate-200 rounded bg-slate-50">
+        <div className="font-bold text-xs mb-1">Camp Report</div>
+        <div className="text-[10px] text-slate-500 mb-2">{selectedCamp.reportDocumentStatus || 'Not Uploaded'}</div>
+        <Button variant="outline" size="sm" className="w-full text-[10px] cursor-pointer" onClick={() => handleMockUploadDoc('report')}>
+          Upload Report
+        </Button>
+      </div>
+      <div className="p-3 border border-slate-200 rounded bg-slate-50">
+        <div className="font-bold text-xs mb-1">Photos (ZIP)</div>
+        <div className="text-[10px] text-slate-500 mb-2">{selectedCamp.photosDocumentStatus || 'Not Uploaded'}</div>
+        <Button variant="outline" size="sm" className="w-full text-[10px] cursor-pointer" onClick={() => handleMockUploadDoc('photos')}>
+          Upload Photos
+        </Button>
+      </div>
+    </div>
+  </div>
  </div>
  )}
  </Drawer>

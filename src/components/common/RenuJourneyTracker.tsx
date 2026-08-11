@@ -1,5 +1,5 @@
 import React from'react';
-import { ChildJourneyStatus } from'../../types';
+import { ChildJourneyStatus } from'../../programmes/renu/types';
 import { Check, ShieldAlert, Award } from'lucide-react';
 
 interface TrackerProps {

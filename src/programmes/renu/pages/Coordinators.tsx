@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
+import { RenuStore } from'../data/renuStore';
 import { Coordinator, Child, Camp, FollowUp, CoordinatorActivity } from'../types';
-import { Card, Badge, Button, Drawer, Select, Label } from'../components/ui';
+import { Card, Badge, Button, Drawer, Select, Label } from'../../../components/ui';
 import { User, Phone, Mail, MapPin, ClipboardList, CheckCircle2, Heart, Calendar, Clock, Activity, ShieldCheck, Sparkles, Check, X } from'lucide-react';
-import { showToast } from'../hooks/useToast';
+import { showToast } from'../../../hooks/useToast';
 
 export const Coordinators: React.FC = () => {
  const [coordinators, setCoordinators] = useState<Coordinator[]>([]);

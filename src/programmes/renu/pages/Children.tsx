@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
-import { useRole } from'../hooks/useRole';
-import { showToast } from'../hooks/useToast';
+import { RenuStore } from'../data/renuStore';
+import { useRole } from'../../../hooks/useRole';
+import { showToast } from'../../../hooks/useToast';
 import { Child, Camp, DisabilityType, SeverityLevel, ChildJourneyStatus } from'../types';
-import { Card, Badge, Button, Input, Select, Label, Modal } from'../components/ui';
+import { Card, Badge, Button, Input, Select, Label, Modal } from'../../../components/ui';
 import { Search, MapPin, ChevronRight, Sparkles, Clipboard, Heart, Settings, AlertCircle, Info, Plus } from'lucide-react';
-import EmptyState from'../components/common/EmptyState';
+import EmptyState from'../../../components/common/EmptyState';
 import { useNavigate, useSearchParams } from'react-router-dom';
-import { JOURNEY_STEPS } from'../components/common/RenuJourneyTracker';
+import { JOURNEY_STEPS } from'../../../components/common/RenuJourneyTracker';
 import { motion } from'framer-motion';
 
 export const Children: React.FC = () => {

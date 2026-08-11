@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
-import { useRole } from'../hooks/useRole';
-import { showToast } from'../hooks/useToast';
-import { Card, Badge, Button } from'../components/ui';
+import { RenuStore } from'../data/renuStore';
+import { useRole } from'../../../hooks/useRole';
+import { showToast } from'../../../hooks/useToast';
+import { Card, Badge, Button } from'../../../components/ui';
 import { useNavigate } from'react-router-dom';
 import { motion } from'framer-motion';
 import {
@@ -28,7 +28,7 @@ import {
  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
  PieChart, Pie, Cell, BarChart, Bar
 } from'recharts';
-import { JOURNEY_STEPS } from'../components/common/RenuJourneyTracker';
+import { JOURNEY_STEPS } from'../../../components/common/RenuJourneyTracker';
 
 export const Dashboard: React.FC = () => {
  const { role, isAdmin } = useRole();
@@ -200,7 +200,7 @@ export const Dashboard: React.FC = () => {
 
     {/* Register Child */}
     <button
-      onClick={() => navigate('/children?register=true')}
+      onClick={() => navigate('/renu/children?register=true')}
       className="group relative overflow-hidden bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-red-300 hover:shadow-lg transition-all duration-300"
     >
       <Users className="absolute right-2 bottom-2 h-16 w-16 text-red-100" />
@@ -227,7 +227,7 @@ export const Dashboard: React.FC = () => {
           showToast('Access Denied','danger','Admin privileges are required.');
           return;
         }
-        navigate('/camps?add=true');
+        navigate('/renu/camps?add=true');
       }}
       className={`group relative overflow-hidden bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-red-300 hover:shadow-lg transition-all duration-300 ${
         role === 'Coordinator'
@@ -254,7 +254,7 @@ export const Dashboard: React.FC = () => {
 
     {/* Follow Up */}
     <button
-      onClick={() => navigate('/children')}
+      onClick={() => navigate('/renu/children')}
       className="group relative overflow-hidden bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-red-300 hover:shadow-lg transition-all duration-300"
     >
       <Clock className="absolute right-2 bottom-2 h-16 w-16 text-red-100" />
@@ -276,7 +276,7 @@ export const Dashboard: React.FC = () => {
 
     {/* Upload Report */}
     <button
-      onClick={() => navigate('/diagnosis')}
+      onClick={() => navigate('/renu/diagnosis')}
       className="group relative overflow-hidden bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-red-300 hover:shadow-lg transition-all duration-300"
     >
       <Upload className="absolute right-2 bottom-2 h-16 w-16 text-red-100" />
@@ -303,7 +303,7 @@ export const Dashboard: React.FC = () => {
           showToast('Access Denied','danger','Admin privileges are required.');
           return;
         }
-        navigate('/sponsorships');
+        navigate('/renu/sponsorships');
       }}
       className={`group relative overflow-hidden bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-red-300 hover:shadow-lg transition-all duration-300 ${
         role === 'Coordinator'
@@ -330,7 +330,7 @@ export const Dashboard: React.FC = () => {
 
     {/* Parent Report */}
     <button
-      onClick={() => navigate('/reports')}
+      onClick={() => navigate('/renu/reports')}
       className="group relative overflow-hidden bg-white border border-slate-200 rounded-2xl p-5 text-left hover:border-red-300 hover:shadow-lg transition-all duration-300"
     >
       <FileText className="absolute right-2 bottom-2 h-16 w-16 text-red-100" />
@@ -434,7 +434,7 @@ export const Dashboard: React.FC = () => {
  )}
  <motion.div 
  whileHover={{ scale: 1.05 }}
- onClick={() => navigate(`/children?status=${encodeURIComponent(node.step)}`)}
+ onClick={() => navigate(`/renu/children?status=${encodeURIComponent(node.step)}`)}
  className="flex flex-col items-center cursor-pointer group text-center"
  style={{ width:'85px'}}
  >

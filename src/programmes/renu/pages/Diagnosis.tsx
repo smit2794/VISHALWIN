@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
-import { useRole } from'../hooks/useRole';
-import { showToast } from'../hooks/useToast';
+import { RenuStore } from'../data/renuStore';
+import { useRole } from'../../../hooks/useRole';
+import { showToast } from'../../../hooks/useToast';
 import { Child, Diagnosis, TherapyCentre } from'../types';
-import { Card, Badge, Button, Input, Select, Label, Tabs, Textarea, Modal } from'../components/ui';
+import { Card, Badge, Button, Input, Select, Label, Tabs, Textarea, Modal } from'../../../components/ui';
 import { FileText, CheckCircle2, AlertCircle, FileCheck, Stethoscope, Search, Plus, Calendar, Upload } from'lucide-react';
-import EmptyState from'../components/common/EmptyState';
+import EmptyState from'../../../components/common/EmptyState';
 
 export const DiagnosisPage: React.FC = () => {
  const { role, isAdmin } = useRole();
@@ -32,6 +32,18 @@ export const DiagnosisPage: React.FC = () => {
  assessmentScore: 70,
  outcome:'',
  fileName:''
+ });
+
+ // Edit Extra Details State
+ const [editingDiag, setEditingDiag] = useState<Diagnosis | null>(null);
+ const [extraData, setExtraData] = useState({
+ referringDoctorName: '',
+ referringDoctorHospital: '',
+ referringDoctorMobile: '',
+ certStatus: 'Applied',
+ certExpiryDate: '',
+ certFileName: '',
+ reportFileName: ''
  });
 
  useEffect(() => {
@@ -136,6 +148,56 @@ export const DiagnosisPage: React.FC = () => {
  showToast('Report Uploaded','info','Mock medical certificate PDF was attached.');
  };
 
+ const handleEditExtrasOpen = (diag: Diagnosis) => {
+ setEditingDiag(diag);
+ setExtraData({
+ referringDoctorName: diag.referringDoctor?.name || '',
+ referringDoctorHospital: diag.referringDoctor?.hospital || '',
+ referringDoctorMobile: diag.referringDoctor?.mobile || '',
+ certStatus: diag.disabilityCertificate?.status || 'Applied',
+ certExpiryDate: diag.disabilityCertificate?.expiryDate || '',
+ certFileName: diag.disabilityCertificate?.fileName || '',
+ reportFileName: diag.diagnosisReportFileName || ''
+ });
+ };
+
+ const handleExtrasSubmit = (e: React.FormEvent) => {
+ e.preventDefault();
+ if (!editingDiag) return;
+
+ const updatedDiag = {
+ ...editingDiag,
+ referringDoctor: {
+ name: extraData.referringDoctorName,
+ hospital: extraData.referringDoctorHospital,
+ mobile: extraData.referringDoctorMobile
+ },
+ disabilityCertificate: {
+ status: extraData.certStatus as any,
+ expiryDate: extraData.certExpiryDate,
+ fileName: extraData.certFileName
+ },
+ diagnosisReportFileName: extraData.reportFileName
+ };
+
+ const updatedAll = diagnoses.map(d => d.id === editingDiag.id ? updatedDiag : d);
+ RenuStore.saveDiagnoses(updatedAll);
+ setDiagnoses(updatedAll);
+ setEditingDiag(null);
+ showToast('Details Updated', 'success', 'Diagnosis details saved successfully.');
+ window.dispatchEvent(new Event('renu_data_updated'));
+ };
+
+ const handleMockUploadExtra = (type: 'cert' | 'report') => {
+ if (type === 'cert') {
+ setExtraData({ ...extraData, certFileName: 'disability_cert.pdf' });
+ showToast('Certificate Uploaded', 'success');
+ } else {
+ setExtraData({ ...extraData, reportFileName: 'diagnosis_report.pdf' });
+ showToast('Report Uploaded', 'success');
+ }
+ };
+
  return (
  <div className="space-y-6">
  {/* Header */}
@@ -238,6 +300,24 @@ export const DiagnosisPage: React.FC = () => {
  ) : (
  <span className="text-[10px] text-slate-400 italic">No document file attached</span>
  )}
+ <Button variant="outline" size="sm" onClick={() => handleEditExtrasOpen(diag)} className="cursor-pointer text-[10px] py-1 h-auto">
+ Update Details
+ </Button>
+ </div>
+ 
+ {/* Extra Details Display */}
+ <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-3 text-[10px]">
+ <div>
+ <span className="font-bold text-slate-700">Ref. Doctor:</span> {diag.referringDoctor?.name || 'N/A'}
+ </div>
+ <div>
+ <span className="font-bold text-slate-700">Disability Cert:</span> {diag.disabilityCertificate?.status || 'N/A'}
+ </div>
+ <div>
+ <span className="font-bold text-slate-700">Report:</span> {diag.diagnosisReportFileName ? (
+ <Badge color="success" className="scale-75 origin-left py-0">Uploaded</Badge>
+ ) : 'Pending'}
+ </div>
  </div>
  </Card>
  );
@@ -398,6 +478,50 @@ export const DiagnosisPage: React.FC = () => {
  <Button type="submit">
  Log Assessment Outcomes
  </Button>
+ </div>
+ </form>
+ </Modal>
+
+ {/* Edit Extras Modal */}
+ <Modal
+ isOpen={!!editingDiag}
+ onClose={() => setEditingDiag(null)}
+ title={`Update Diagnosis Details`}
+ size="md"
+ >
+ <form onSubmit={handleExtrasSubmit} className="space-y-4 text-xs">
+ <div>
+ <h4 className="font-bold text-slate-700 mb-2">Referring Doctor</h4>
+ <div className="grid grid-cols-2 gap-3">
+ <Input placeholder="Name" value={extraData.referringDoctorName} onChange={e => setExtraData({...extraData, referringDoctorName: e.target.value})} />
+ <Input placeholder="Hospital" value={extraData.referringDoctorHospital} onChange={e => setExtraData({...extraData, referringDoctorHospital: e.target.value})} />
+ <Input placeholder="Mobile" value={extraData.referringDoctorMobile} onChange={e => setExtraData({...extraData, referringDoctorMobile: e.target.value})} className="col-span-2" />
+ </div>
+ </div>
+ <div>
+ <h4 className="font-bold text-slate-700 mb-2">Disability Certificate</h4>
+ <div className="grid grid-cols-2 gap-3">
+ <Select 
+ options={['Applied', 'Received', 'Expired'].map(s => ({label: s, value: s}))}
+ value={extraData.certStatus} onChange={e => setExtraData({...extraData, certStatus: e.target.value})}
+ />
+ <Input type="date" value={extraData.certExpiryDate} onChange={e => setExtraData({...extraData, certExpiryDate: e.target.value})} placeholder="Expiry Date" />
+ <div className="col-span-2 flex items-center justify-between border p-2 rounded">
+ <span>{extraData.certFileName || 'No certificate uploaded'}</span>
+ <Button type="button" variant="outline" size="sm" onClick={() => handleMockUploadExtra('cert')}>Upload</Button>
+ </div>
+ </div>
+ </div>
+ <div>
+ <h4 className="font-bold text-slate-700 mb-2">Diagnosis Report</h4>
+ <div className="flex items-center justify-between border p-2 rounded">
+ <span>{extraData.reportFileName || 'No report uploaded'}</span>
+ <Button type="button" variant="outline" size="sm" onClick={() => handleMockUploadExtra('report')}>Upload</Button>
+ </div>
+ </div>
+ <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+ <Button variant="outline" type="button" onClick={() => setEditingDiag(null)}>Cancel</Button>
+ <Button type="submit">Save Updates</Button>
  </div>
  </form>
  </Modal>

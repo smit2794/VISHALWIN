@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
+import { RenuStore } from'../data/renuStore';
 import { InventoryItem, InventoryDistribution, Camp } from'../types';
-import { Card, Badge, Button, Input, Select, Label, Modal, Tabs } from'../components/ui';
+import { Card, Badge, Button, Input, Select, Label, Modal, Tabs } from'../../../components/ui';
 import { Package, AlertTriangle, Truck, Plus, BarChart2, CheckCircle2, FileText, Printer, Calendar, Clock, AlertCircle } from'lucide-react';
-import { showToast } from'../hooks/useToast';
-import EmptyState from'../components/common/EmptyState';
+import { showToast } from'../../../hooks/useToast';
+import EmptyState from'../../../components/common/EmptyState';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from'recharts';
 
 export const Inventory: React.FC = () => {

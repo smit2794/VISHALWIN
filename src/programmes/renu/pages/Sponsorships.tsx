@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
+import { RenuStore } from'../data/renuStore';
 import { Sponsorship } from'../types';
-import { Card, Badge, Label } from'../components/ui';
+import { Card, Badge, Label } from'../../../components/ui';
 import { Coins, HeartHandshake, Calendar, CreditCard, User, Sparkles, Plus, AlertCircle } from'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from'recharts';
 import { useNavigate } from'react-router-dom';

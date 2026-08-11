@@ -1,5 +1,5 @@
 import { useState } from'react';
-import { UserRole } from'../types';
+import { UserRole } from'../programmes/renu/types';
 
 export const useRole = () => {
  const [role, setRoleState] = useState<UserRole>(() => {

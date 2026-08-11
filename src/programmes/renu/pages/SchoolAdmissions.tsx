@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from'react';
-import { RenuStore } from'../data/mockData';
-import { useRole } from'../hooks/useRole';
-import { showToast } from'../hooks/useToast';
+import { RenuStore } from'../data/renuStore';
+import { useRole } from'../../../hooks/useRole';
+import { showToast } from'../../../hooks/useToast';
 import { Child, SchoolAdmissionDetails } from'../types';
-import { Card, Badge, Button, Input, Select, Label, Modal } from'../components/ui';
+import { Card, Badge, Button, Input, Select, Label, Modal } from'../../../components/ui';
 import { GraduationCap, Search, CheckCircle2, AlertCircle, FileCheck, Pencil, Calendar, Award } from'lucide-react';
-import EmptyState from'../components/common/EmptyState';
+import EmptyState from'../../../components/common/EmptyState';
 
 export const SchoolAdmissions: React.FC = () => {
  const { role } = useRole();
@@ -21,15 +21,20 @@ export const SchoolAdmissions: React.FC = () => {
 
  // Form State
  const [formData, setFormData] = useState({
- admissionDate:'',
- schoolName:'',
- schoolType:'Government'as SchoolAdmissionDetails['schoolType'],
- standard:'',
- admissionStatus:'Identified'as SchoolAdmissionDetails['admissionStatus'],
+ admissionDate: '',
+ schoolName: '',
+ schoolType: 'Government' as SchoolAdmissionDetails['schoolType'],
+ mediumOfInstruction: 'English' as SchoolAdmissionDetails['mediumOfInstruction'],
+ currentAcademicYear: '',
+ transportSupportBusPass: false,
+ transportSupportAllowance: 0,
+ reportCards: [] as { year: string; grade: string; remarks: string; fileName: string }[],
+ standard: '',
+ admissionStatus: 'Identified' as SchoolAdmissionDetails['admissionStatus'],
  educationSupport: [] as string[],
  feesSponsored: false,
  feesSponsoredAmount: 0,
- remarks:''
+ remarks: ''
  });
 
  useEffect(() => {
@@ -66,16 +71,41 @@ export const SchoolAdmissions: React.FC = () => {
  const details = child.schoolAdmission || {};
  setFormData({
  admissionDate: details.admissionDate || new Date().toISOString().split('T')[0],
- schoolName: details.schoolName ||'',
- schoolType: details.schoolType ||'Government',
- standard: details.standard ||'',
- admissionStatus: details.admissionStatus ||'Identified',
+ schoolName: details.schoolName || '',
+ schoolType: details.schoolType || 'Government',
+ mediumOfInstruction: details.mediumOfInstruction || 'English',
+ currentAcademicYear: details.currentAcademicYear || '',
+ transportSupportBusPass: details.transportSupportBusPass || false,
+ transportSupportAllowance: details.transportSupportAllowance || 0,
+ reportCards: details.reportCards || [],
+ standard: details.standard || '',
+ admissionStatus: details.admissionStatus || 'Identified',
  educationSupport: details.educationSupportProvided || [],
  feesSponsored: details.feesSponsored || false,
  feesSponsoredAmount: details.feesSponsoredAmount || 0,
- remarks: details.remarks ||''
+ remarks: details.remarks || ''
  });
  setIsEditOpen(true);
+ };
+
+ const handleAddReportCard = () => {
+ setFormData({
+ ...formData,
+ reportCards: [...formData.reportCards, { year: formData.currentAcademicYear || '2023-24', grade: '', remarks: '', fileName: '' }]
+ });
+ };
+
+ const handleUpdateReportCard = (index: number, field: string, value: string) => {
+ const updated = [...formData.reportCards];
+ updated[index] = { ...updated[index], [field]: value };
+ setFormData({ ...formData, reportCards: updated });
+ };
+
+ const handleUploadReportCard = (index: number) => {
+ const updated = [...formData.reportCards];
+ updated[index] = { ...updated[index], fileName: 'report_card.pdf' };
+ setFormData({ ...formData, reportCards: updated });
+ showToast('Report Card Uploaded', 'success');
  };
 
  const handleCheckboxChange = (supportItem: string) => {
@@ -101,6 +131,11 @@ export const SchoolAdmissions: React.FC = () => {
  admissionDate: formData.admissionDate,
  schoolName: formData.schoolName || undefined,
  schoolType: formData.schoolType,
+ mediumOfInstruction: formData.mediumOfInstruction,
+ currentAcademicYear: formData.currentAcademicYear,
+ transportSupportBusPass: formData.transportSupportBusPass,
+ transportSupportAllowance: formData.transportSupportAllowance,
+ reportCards: formData.reportCards,
  standard: formData.standard || undefined,
  admissionStatus: formData.admissionStatus,
  educationSupportProvided: formData.educationSupport as any,
@@ -376,6 +411,7 @@ export const SchoolAdmissions: React.FC = () => {
  { label:'Private', value:'Private'},
  { label:'Inclusive School', value:'Inclusive'},
  { label:'Special School', value:'Special School'},
+ { label:'Home Education', value:'Home Education'},
  { label:'Other', value:'Other'}
  ]}
  value={formData.schoolType}
@@ -386,11 +422,36 @@ export const SchoolAdmissions: React.FC = () => {
 
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
  <div>
+ <Label>Medium of Instruction</Label>
+ <Select
+ options={[
+ { label: 'English', value: 'English' },
+ { label: 'Hindi', value: 'Hindi' },
+ { label: 'Gujarati', value: 'Gujarati' },
+ { label: 'Marathi', value: 'Marathi' },
+ { label: 'Other', value: 'Other' }
+ ]}
+ value={formData.mediumOfInstruction}
+ onChange={e => setFormData({ ...formData, mediumOfInstruction: e.target.value as any })}
+ />
+ </div>
+ </div>
+
+ <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+ <div>
  <Label>Standard / Class</Label>
  <Input
  placeholder="e.g. 1st Std"
  value={formData.standard}
  onChange={e => setFormData({ ...formData, standard: e.target.value })}
+ />
+ </div>
+ <div>
+ <Label>Academic Year</Label>
+ <Input
+ placeholder="2023-24"
+ value={formData.currentAcademicYear}
+ onChange={e => setFormData({ ...formData, currentAcademicYear: e.target.value })}
  />
  </div>
  <div>
@@ -414,6 +475,29 @@ export const SchoolAdmissions: React.FC = () => {
  value={formData.admissionDate}
  onChange={e => setFormData({ ...formData, admissionDate: e.target.value })}
  required
+ />
+ </div>
+ </div>
+
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-slate-50 border border-slate-100 rounded-lg">
+ <div>
+ <Label>Transport Support: Bus Pass</Label>
+ <div className="flex gap-4 mt-2">
+ <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+ <input type="radio" checked={formData.transportSupportBusPass === true} onChange={() => setFormData({ ...formData, transportSupportBusPass: true })} className="accent-brand-cyan-700" /> Yes
+ </label>
+ <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+ <input type="radio" checked={formData.transportSupportBusPass === false} onChange={() => setFormData({ ...formData, transportSupportBusPass: false })} className="accent-brand-cyan-700" /> No
+ </label>
+ </div>
+ </div>
+ <div>
+ <Label>Conveyance Allowance (₹)</Label>
+ <Input
+ type="number"
+ placeholder="e.g. 500"
+ value={formData.transportSupportAllowance}
+ onChange={e => setFormData({ ...formData, transportSupportAllowance: Number(e.target.value) })}
  />
  </div>
  </div>
@@ -474,6 +558,25 @@ export const SchoolAdmissions: React.FC = () => {
  })}
  </div>
  </div>
+
+ <div>
+    <Label>Report Cards</Label>
+    <div className="space-y-2 mb-2">
+      {formData.reportCards.map((rc, idx) => (
+        <div key={idx} className="flex gap-2 items-center p-2 border rounded bg-slate-50">
+          <Input placeholder="Year" value={rc.year} onChange={e => handleUpdateReportCard(idx, 'year', e.target.value)} className="w-24" />
+          <Input placeholder="Grade" value={rc.grade} onChange={e => handleUpdateReportCard(idx, 'grade', e.target.value)} className="w-20" />
+          <Input placeholder="Remarks" value={rc.remarks} onChange={e => handleUpdateReportCard(idx, 'remarks', e.target.value)} className="flex-1" />
+          {rc.fileName ? (
+            <Badge color="success">Uploaded</Badge>
+          ) : (
+            <Button type="button" variant="outline" size="sm" onClick={() => handleUploadReportCard(idx)}>Upload</Button>
+          )}
+        </div>
+      ))}
+    </div>
+    <Button type="button" variant="outline" size="sm" onClick={handleAddReportCard}>+ Add Report Card</Button>
+  </div>
 
  <div>
  <Label>Admission Remarks & Notes</Label>
