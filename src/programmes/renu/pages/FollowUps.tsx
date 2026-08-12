@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from'react';
+import { useNavigate } from 'react-router-dom';
 import { RenuStore } from'../data/renuStore';
 import { useRole } from'../../../hooks/useRole';
 import { showToast } from'../../../hooks/useToast';
@@ -8,6 +9,7 @@ import { Calendar, CheckCircle2, Clock, Filter, Phone, AlertCircle, RefreshCw, C
 import EmptyState from'../../../components/common/EmptyState';
 
 export const FollowUps: React.FC = () => {
+ const navigate = useNavigate();
  const { role } = useRole();
  const [followups, setFollowups] = useState<FollowUp[]>([]);
  const [coordinators, setCoordinators] = useState<Coordinator[]>([]);
@@ -44,12 +46,25 @@ export const FollowUps: React.FC = () => {
  window.dispatchEvent(new Event('renu_data_updated'));
  };
 
- const handleUpdateChild = (childId: string, updates: Partial<Child>) => {
- const updatedChildren = children.map(c => c.id === childId ? { ...c, ...updates } : c);
- RenuStore.saveChildren(updatedChildren);
- setChildren(updatedChildren);
- showToast('Benefits Updated','success');
- };
+  const handleUpdateGovtBenefit = (childId: string, benefitKey: keyof NonNullable<Child['govtBenefits']>, updates: Partial<NonNullable<Child['govtBenefits']>[typeof benefitKey]>) => {
+    const updatedChildren = children.map(c => {
+      if (c.id === childId) {
+        const currentBenefits = c.govtBenefits || {};
+        const currentBenefit = currentBenefits[benefitKey] || {};
+        return {
+          ...c,
+          govtBenefits: {
+            ...currentBenefits,
+            [benefitKey]: { ...currentBenefit, ...updates }
+          }
+        };
+      }
+      return c;
+    });
+    RenuStore.saveChildren(updatedChildren);
+    setChildren(updatedChildren);
+    showToast('Benefits Updated', 'success');
+  };
 
  const handleUpdateFupDate = (fupId: string, date: string) => {
  const updated = followups.map(f => f.id === fupId ? { ...f, nextFollowUpDate: date } : f);
@@ -142,7 +157,7 @@ export const FollowUps: React.FC = () => {
  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 border-b border-slate-100 pb-2.5">
  <div>
  <h3 
- onClick={() => window.location.hash =`#/children/${fup.childId}`}
+ onClick={() => navigate(`/renu/children/${fup.childId}`)}
  className="text-sm font-bold text-slate-800 hover:text-brand-cyan-700 hover:underline cursor-pointer"
  >
  Child: {fup.childName}
@@ -230,81 +245,72 @@ export const FollowUps: React.FC = () => {
          </Button>
        </div>
        
-       {expandedGov === fup.id && (
-         <div className="grid grid-cols-2 gap-4 mt-4 text-[10px]">
-           {/* UDID */}
-           <div className="p-3 bg-slate-50 rounded border border-slate-200">
-             <div className="font-bold mb-2 text-slate-800">UDID Card</div>
-             <div className="space-y-2">
-               <Select 
-                 options={['Applied', 'Pending', 'Received', 'Expired'].map(s => ({label: s, value: s}))}
-                 value={child.udidCardStatus || 'Pending'}
-                 onChange={e => handleUpdateChild(child.id, { udidCardStatus: e.target.value as any })}
-               />
-               <Input placeholder="Remarks" value={child.udidCardRemarks || ''} onChange={e => handleUpdateChild(child.id, { udidCardRemarks: e.target.value })} />
-               <Button variant="outline" size="sm" className="w-full mt-1 cursor-pointer" onClick={() => {
-                 handleUpdateChild(child.id, { udidCardFileName: 'udid_doc.pdf' });
-               }}>{child.udidCardFileName ? 'Uploaded' : 'Upload Document'}</Button>
-             </div>
-           </div>
-           
-           {/* Niramaya */}
-           <div className="p-3 bg-slate-50 rounded border border-slate-200">
-             <div className="font-bold mb-2 text-slate-800">Niramaya Insurance</div>
-             <div className="space-y-2">
-               <Select 
-                 options={['Active', 'Pending', 'Expired'].map(s => ({label: s, value: s}))}
-                 value={child.niramayaStatus || 'Pending'}
-                 onChange={e => handleUpdateChild(child.id, { niramayaStatus: e.target.value as any })}
-               />
-               <Input type="date" placeholder="Expiry" value={child.niramayaExpiry || ''} onChange={e => handleUpdateChild(child.id, { niramayaExpiry: e.target.value })} />
-               <Button variant="outline" size="sm" className="w-full mt-1 cursor-pointer" onClick={() => {
-                 handleUpdateChild(child.id, { niramayaFileName: 'niramaya_doc.pdf' });
-               }}>{child.niramayaFileName ? 'Uploaded' : 'Upload Document'}</Button>
-             </div>
-           </div>
-
-           {/* Disability Pension */}
-           <div className="p-3 bg-slate-50 rounded border border-slate-200">
-             <div className="font-bold mb-2 text-slate-800">Disability Pension</div>
-             <div className="space-y-2">
-               <Select 
-                 options={['Applied', 'Approved', 'Not Applicable'].map(s => ({label: s, value: s}))}
-                 value={child.disabilityPensionStatus || 'Not Applicable'}
-                 onChange={e => handleUpdateChild(child.id, { disabilityPensionStatus: e.target.value as any })}
-               />
-               <Input type="number" placeholder="Amount" value={child.disabilityPensionAmount || 0} onChange={e => handleUpdateChild(child.id, { disabilityPensionAmount: Number(e.target.value) })} />
-             </div>
-           </div>
-
-           {/* Bus Pass & Scholarship */}
-           <div className="space-y-3">
-             <div className="p-3 bg-slate-50 rounded border border-slate-200">
-               <div className="font-bold mb-2 text-slate-800">Bus Pass</div>
-               <div className="space-y-2">
-                 <Select 
-                   options={['Issued', 'Not Issued'].map(s => ({label: s, value: s}))}
-                   value={child.busPassStatus || 'Not Issued'}
-                   onChange={e => handleUpdateChild(child.id, { busPassStatus: e.target.value as any })}
-                 />
-                 <Input type="date" placeholder="Issue Date" value={child.busPassIssueDate || ''} onChange={e => handleUpdateChild(child.id, { busPassIssueDate: e.target.value })} />
-               </div>
-             </div>
-             <div className="p-3 bg-slate-50 rounded border border-slate-200">
-               <div className="font-bold mb-2 text-slate-800">Scholarship</div>
-               <div className="space-y-2">
-                 <Select 
-                   options={['Applied', 'Approved', 'Not Applicable'].map(s => ({label: s, value: s}))}
-                   value={child.scholarshipStatus || 'Not Applicable'}
-                   onChange={e => handleUpdateChild(child.id, { scholarshipStatus: e.target.value as any })}
-                 />
-                 <Input type="number" placeholder="Amount" value={child.scholarshipAmount || 0} onChange={e => handleUpdateChild(child.id, { scholarshipAmount: Number(e.target.value) })} />
-                 <Input placeholder="Scheme Name" value={child.scholarshipScheme || ''} onChange={e => handleUpdateChild(child.id, { scholarshipScheme: e.target.value })} />
-               </div>
-             </div>
-           </div>
-         </div>
-       )}
+        {expandedGov === fup.id && (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 text-[10px]">
+            {[
+              { key: 'disabilityCertificate', title: 'Disability Certificate', fields: ['status', 'renewalDate', 'remarks', 'upload'] },
+              { key: 'udidCard', title: 'UDID Card', fields: ['status', 'renewalDate', 'remarks', 'upload'] },
+              { key: 'niramayaInsurance', title: 'Niramaya Insurance', fields: ['status', 'renewalDate', 'expiryDate', 'upload'] },
+              { key: 'disabilityPension', title: 'Disability Pension', fields: ['status', 'renewalDate', 'amount'] },
+              { key: 'busPass', title: 'Bus Pass', fields: ['status', 'renewalDate', 'issueDate'] },
+              { key: 'railwayPass', title: 'Railway Pass', fields: ['status', 'renewalDate'] },
+              { key: 'ayushmanCard', title: 'Ayushman Card', fields: ['status', 'renewalDate', 'upload'] },
+              { key: 'pmjay', title: 'PMJAY', fields: ['status', 'renewalDate'] },
+              { key: 'sadhanSahay', title: 'Sadhan Sahay', fields: ['status', 'renewalDate', 'amount'] },
+              { key: 'tlmKit', title: 'TLM Kit', fields: ['status', 'renewalDate'] },
+              { key: 'scholarship', title: 'Scholarship', fields: ['status', 'renewalDate', 'amount', 'schemeName'] },
+              { key: 'hostel', title: 'Hostel', fields: ['status', 'renewalDate', 'remarks'] },
+              { key: 'caregiverAllowance', title: 'Caregiver Allowance', fields: ['status', 'renewalDate', 'amount'] }
+            ].map(benefit => {
+              const bKey = benefit.key as keyof NonNullable<Child['govtBenefits']>;
+              const currentData = child.govtBenefits?.[bKey] || {};
+              return (
+                <div key={bKey} className="p-3 bg-slate-50 rounded border border-slate-200">
+                  <div className="font-bold mb-2 text-slate-800">{benefit.title}</div>
+                  <div className="space-y-2">
+                    {benefit.fields.includes('status') && (
+                      <Select 
+                        options={['Applied', 'Approved', 'Rejected'].map(s => ({label: s, value: s}))}
+                        value={currentData.status || ''}
+                        onChange={e => handleUpdateGovtBenefit(child.id, bKey, { status: e.target.value as any })}
+                      />
+                    )}
+                    {benefit.fields.includes('renewalDate') && (
+                      <Input type="date" placeholder="Renewal Date" value={currentData.renewalDate || ''} onChange={e => handleUpdateGovtBenefit(child.id, bKey, { renewalDate: e.target.value })} />
+                    )}
+                    {benefit.fields.includes('expiryDate') && (
+                      <Input type="date" placeholder="Expiry Date" value={(currentData as any).expiryDate || ''} onChange={e => handleUpdateGovtBenefit(child.id, bKey, { expiryDate: e.target.value } as any)} />
+                    )}
+                    {benefit.fields.includes('issueDate') && (
+                      <Input type="date" placeholder="Issue Date" value={currentData.issueDate || ''} onChange={e => handleUpdateGovtBenefit(child.id, bKey, { issueDate: e.target.value })} />
+                    )}
+                    {benefit.fields.includes('amount') && (
+                      <Input type="number" placeholder="Amount" value={currentData.amount || ''} onChange={e => handleUpdateGovtBenefit(child.id, bKey, { amount: Number(e.target.value) })} />
+                    )}
+                    {benefit.fields.includes('schemeName') && (
+                      <Input placeholder="Scheme Name" value={currentData.schemeName || ''} onChange={e => handleUpdateGovtBenefit(child.id, bKey, { schemeName: e.target.value })} />
+                    )}
+                    {benefit.fields.includes('remarks') && (
+                      <Input placeholder="Remarks" value={currentData.remarks || ''} onChange={e => handleUpdateGovtBenefit(child.id, bKey, { remarks: e.target.value })} />
+                    )}
+                    {benefit.fields.includes('upload') && (
+                      <Button variant="outline" size="sm" className="w-full mt-1 cursor-pointer" onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.onchange = (e: any) => {
+                          if (e.target.files?.length) {
+                            handleUpdateGovtBenefit(child.id, bKey, { fileName: e.target.files[0].name });
+                          }
+                        };
+                        input.click();
+                      }}>{currentData.fileName ? 'Uploaded: ' + currentData.fileName : 'Upload Document'}</Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
      </div>
    );
  })()}

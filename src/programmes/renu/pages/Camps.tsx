@@ -2,7 +2,7 @@ import React, { useState, useEffect } from'react';
 import { RenuStore } from'../data/renuStore';
 import { useRole } from'../../../hooks/useRole';
 import { showToast } from'../../../hooks/useToast';
-import { Camp, Coordinator, Child } from'../types';
+import { Camp, Coordinator, Child, CampOrganizer, CampFollowUpSection } from'../types';
 import { Card, Badge, Button, Input, Select, Label, Modal, Drawer } from'../../../components/ui';
 import { Search, Filter, Plus, Calendar, MapPin, User, Stethoscope, ArrowUpDown, ChevronRight, Edit } from'lucide-react';
 import EmptyState from'../../../components/common/EmptyState';
@@ -31,20 +31,48 @@ export const Camps: React.FC = () => {
  const [campToEdit, setCampToEdit] = useState<Camp | null>(null);
 
  // Form State
- const [formData, setFormData] = useState({
- name:'',
- date:'',
- location:'',
- area:'',
- city:'Mumbai',
- coordinatorId:'',
- doctorName:'',
- therapistName:'',
- registeredCount: 0,
- normalCount: 0,
- specialCount: 0,
- followUpsRequiredCount: 0
- });
+  const [formData, setFormData] = useState({
+  name:'',
+  date:'',
+  time: '',
+  duration: '',
+  location:'',
+  address: '',
+  place: '',
+  area:'',
+  city:'Mumbai',
+  coverageArea: 'Village' as Camp['coverageArea'],
+  venueType: 'School' as Camp['venueType'],
+  campType: 'Medical Screening & Assessment Camp' as Camp['campType'],
+  coordinatorId:'',
+  doctorName:'',
+  therapistName:'',
+  registeredCount: 0,
+  screenedCount: 0,
+  maleScreenedCount: 0,
+  femaleScreenedCount: 0,
+  normalCount: 0,
+  specialCount: 0,
+  followUpsRequiredCount: 0,
+  organizer: {
+    isCollaborated: false,
+    collaborationType: 'CSR',
+    instituteName: '',
+    instituteAddress: '',
+    repName: '',
+    repDesignation: '',
+    repContact: '',
+    repEmail: ''
+  } as CampOrganizer,
+  campFollowUp: {
+    ageBand: '0-12',
+    isDisabilityID: false,
+    referralTherapy: false,
+    referralMedicalTreatment: false,
+    referralGovtScheme: false,
+    referralRenuAdmission: false
+  } as CampFollowUpSection
+  });
 
  // Additional Drawer State
  const [newTeamMember, setNewTeamMember] = useState({ role: 'Volunteer', name: '', mobile: '' });
@@ -202,10 +230,22 @@ export const Camps: React.FC = () => {
  coordinatorId: formData.coordinatorId,
  doctorName: formData.doctorName ||'Dr. Assigned',
  therapistName: formData.therapistName ||'Therapist Assigned',
+ time: formData.time,
+ duration: formData.duration,
+ address: formData.address,
+ place: formData.place,
+ coverageArea: formData.coverageArea,
+ venueType: formData.venueType,
+ campType: formData.campType,
  registeredCount: Number(formData.registeredCount) || 0,
+ screenedCount: Number(formData.screenedCount) || 0,
+ maleScreenedCount: Number(formData.maleScreenedCount) || 0,
+ femaleScreenedCount: Number(formData.femaleScreenedCount) || 0,
  normalCount: Number(formData.normalCount) || 0,
  specialCount: Number(formData.specialCount) || 0,
- followUpsRequiredCount: Number(formData.followUpsRequiredCount) || 0
+ followUpsRequiredCount: Number(formData.followUpsRequiredCount) || 0,
+ organizer: formData.organizer,
+ campFollowUp: formData.campFollowUp
  };
 
  const updated = [newCamp, ...camps];
@@ -233,10 +273,22 @@ export const Camps: React.FC = () => {
  coordinatorId: camp.coordinatorId,
  doctorName: camp.doctorName,
  therapistName: camp.therapistName,
+ time: camp.time || '',
+ duration: camp.duration || '',
+ address: camp.address || '',
+ place: camp.place || '',
+ coverageArea: camp.coverageArea || 'Village',
+ venueType: camp.venueType || 'School',
+ campType: camp.campType || 'Medical Screening & Assessment Camp',
  registeredCount: camp.registeredCount,
+ screenedCount: camp.screenedCount || 0,
+ maleScreenedCount: camp.maleScreenedCount || 0,
+ femaleScreenedCount: camp.femaleScreenedCount || 0,
  normalCount: camp.normalCount,
  specialCount: camp.specialCount,
- followUpsRequiredCount: camp.followUpsRequiredCount
+ followUpsRequiredCount: camp.followUpsRequiredCount,
+  organizer: camp.organizer || { isCollaborated: false, collaborationType: 'CSR', instituteName: '', instituteAddress: '', repName: '', repDesignation: '', repContact: '', repEmail: '' } as CampOrganizer,
+  campFollowUp: camp.campFollowUp || { ageBand: '0-12', isDisabilityID: false, referralTherapy: false, referralMedicalTreatment: false, referralGovtScheme: false, referralRenuAdmission: false } as CampFollowUpSection
  });
  setIsEditOpen(true);
  };
@@ -258,10 +310,22 @@ export const Camps: React.FC = () => {
  coordinatorId: formData.coordinatorId,
  doctorName: formData.doctorName,
  therapistName: formData.therapistName,
+ time: formData.time,
+ duration: formData.duration,
+ address: formData.address,
+ place: formData.place,
+ coverageArea: formData.coverageArea,
+ venueType: formData.venueType,
+ campType: formData.campType,
  registeredCount: Number(formData.registeredCount) || 0,
+ screenedCount: Number(formData.screenedCount) || 0,
+ maleScreenedCount: Number(formData.maleScreenedCount) || 0,
+ femaleScreenedCount: Number(formData.femaleScreenedCount) || 0,
  normalCount: Number(formData.normalCount) || 0,
  specialCount: Number(formData.specialCount) || 0,
- followUpsRequiredCount: Number(formData.followUpsRequiredCount) || 0
+ followUpsRequiredCount: Number(formData.followUpsRequiredCount) || 0,
+ organizer: formData.organizer,
+ campFollowUp: formData.campFollowUp
  };
  }
  return camp;
@@ -276,22 +340,50 @@ export const Camps: React.FC = () => {
  resetForm();
  };
 
- const resetForm = () => {
- setFormData({
- name:'',
- date:'',
- location:'',
- area:'',
- city:'Mumbai',
- coordinatorId: coordinators[0]?.id ||'',
- doctorName:'',
- therapistName:'',
- registeredCount: 0,
- normalCount: 0,
- specialCount: 0,
- followUpsRequiredCount: 0
- });
- };
+  const resetForm = () => {
+  setFormData({
+  name:'',
+  date:'',
+  time: '',
+  duration: '',
+  location:'',
+  address: '',
+  place: '',
+  area:'',
+  city:'Mumbai',
+  coverageArea: 'Village',
+  venueType: 'School',
+  campType: 'Medical Screening & Assessment Camp',
+  coordinatorId: coordinators[0]?.id ||'',
+  doctorName:'',
+  therapistName:'',
+  registeredCount: 0,
+  screenedCount: 0,
+  maleScreenedCount: 0,
+  femaleScreenedCount: 0,
+  normalCount: 0,
+  specialCount: 0,
+  followUpsRequiredCount: 0,
+  organizer: {
+    isCollaborated: false,
+    collaborationType: 'CSR',
+    instituteName: '',
+    instituteAddress: '',
+    repName: '',
+    repDesignation: '',
+    repContact: '',
+    repEmail: ''
+  } as CampOrganizer,
+  campFollowUp: {
+    ageBand: '0-12',
+    isDisabilityID: false,
+    referralTherapy: false,
+    referralMedicalTreatment: false,
+    referralGovtScheme: false,
+    referralRenuAdmission: false
+  } as CampFollowUpSection
+  });
+  };
 
  const citiesOptions = [
  { label:'All Cities', value:'All'},
@@ -614,7 +706,7 @@ export const Camps: React.FC = () => {
     <div className="flex gap-2 items-end">
       <div className="flex-1">
         <Select 
-          options={['Pediatrician', 'Neurologist', 'Therapist', 'Volunteer', 'Coordinator'].map(r => ({label: r, value: r}))} 
+          options={['Pediatrician', 'Developmental Pediatrician', 'Neurologist', 'Psychiatrist', 'Psychologist', 'Occupational Therapist', 'Speech Therapist', 'Physiotherapist', 'Audiologist', 'Vision Expert', 'Nutritionist', 'Orthopedic Doctor', 'Prosthetist & Orthotist', 'Special Educator', 'Coordinator', 'Volunteer'].map(r => ({label: r, value: r}))} 
           value={newTeamMember.role} onChange={e => setNewTeamMember({...newTeamMember, role: e.target.value as any})} 
         />
       </div>
@@ -665,21 +757,53 @@ export const Camps: React.FC = () => {
   {/* Camp Documents */}
   <div>
     <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">Camp Documents</h4>
-    <div className="grid grid-cols-2 gap-4">
-      <div className="p-3 border border-slate-200 rounded bg-slate-50">
-        <div className="font-bold text-xs mb-1">Camp Report</div>
-        <div className="text-[10px] text-slate-500 mb-2">{selectedCamp.reportDocumentStatus || 'Not Uploaded'}</div>
-        <Button variant="outline" size="sm" className="w-full text-[10px] cursor-pointer" onClick={() => handleMockUploadDoc('report')}>
-          Upload Report
-        </Button>
-      </div>
-      <div className="p-3 border border-slate-200 rounded bg-slate-50">
-        <div className="font-bold text-xs mb-1">Photos (ZIP)</div>
-        <div className="text-[10px] text-slate-500 mb-2">{selectedCamp.photosDocumentStatus || 'Not Uploaded'}</div>
-        <Button variant="outline" size="sm" className="w-full text-[10px] cursor-pointer" onClick={() => handleMockUploadDoc('photos')}>
-          Upload Photos
-        </Button>
-      </div>
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      {['Permission Letter', 'Approval Letter', 'Posters', 'Banners', 'Social Media Creative', 'Registration Sheet', 'Google Form', 'Photos', 'Videos', 'Parents Feedback', 'Press Coverage', 'Media Link', 'Other IEC Material'].map((docType) => {
+        const existingDoc = (selectedCamp.campDocuments || []).find(d => d.type === docType);
+        
+        return (
+        <div key={docType} className="p-3 border border-slate-200 rounded bg-slate-50 flex flex-col justify-between">
+          <div>
+            <div className="font-bold text-xs mb-1">{docType}</div>
+            <div className="text-[10px] text-slate-500 mb-2">
+              {existingDoc ? (docType === 'Media Link' ? existingDoc.mediaLink : existingDoc.fileName) : 'Not Provided'}
+            </div>
+          </div>
+          {docType === 'Media Link' ? (
+            <div className="flex gap-2">
+               <Input 
+                 placeholder="URL..." 
+                 className="h-6 text-[10px]" 
+                 value={existingDoc?.mediaLink || ''} 
+                 onChange={(e) => {
+                   const updated = {
+                     ...selectedCamp,
+                     campDocuments: [
+                       ...(selectedCamp.campDocuments || []).filter(d => d.type !== docType),
+                       { type: docType as any, mediaLink: e.target.value }
+                     ]
+                   };
+                   updateSelectedCampInStore(updated);
+                 }}
+               />
+            </div>
+          ) : (
+            <Button variant="outline" size="sm" className="w-full text-[10px] cursor-pointer" onClick={() => {
+              const updated = {
+                ...selectedCamp,
+                campDocuments: [
+                  ...(selectedCamp.campDocuments || []).filter(d => d.type !== docType),
+                  { type: docType as any, fileName: `uploaded_${docType.replace(/ /g, '_')}.pdf` }
+                ]
+              };
+              updateSelectedCampInStore(updated);
+              showToast(`${docType} Uploaded`, 'success');
+            }}>
+              Upload File
+            </Button>
+          )}
+        </div>
+      )})}
     </div>
   </div>
  </div>

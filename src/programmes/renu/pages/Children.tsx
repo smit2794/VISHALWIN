@@ -51,8 +51,9 @@ export const Children: React.FC = () => {
  schoolName:'',
  currentStandard:'',
  isNotEnrolled: true,
+ registrationSource: 'Medical Camp' as Child['registrationSource'],
  classification:'Special'as Child['classification'],
- disabilityType:'Speech Delay'as DisabilityType,
+ disabilityType:'Autism'as DisabilityType,
  severity:'Mild'as SeverityLevel,
  journeyStatus:'Medical Camp'as ChildJourneyStatus,
  });
@@ -177,6 +178,7 @@ export const Children: React.FC = () => {
  schoolName: formData.isNotEnrolled ? undefined : formData.schoolName,
  currentStandard: formData.isNotEnrolled ? undefined : formData.currentStandard,
  isNotEnrolled: formData.isNotEnrolled,
+ registrationSource: formData.registrationSource,
  classification: formData.classification,
  disabilityType: formData.classification ==='Special'? formData.disabilityType : undefined,
  severity: formData.classification ==='Special'? formData.severity : undefined,
@@ -233,12 +235,26 @@ export const Children: React.FC = () => {
  schoolName:'',
  currentStandard:'',
  isNotEnrolled: true,
+ registrationSource: 'Medical Camp',
  classification:'Special',
- disabilityType:'Speech Delay',
+ disabilityType:'Autism',
  severity:'Mild',
  journeyStatus:'Medical Camp',
  });
  };
+
+ const registrationSourceOptions = [
+ { label:'Medical Camp', value:'Medical Camp'},
+ { label:'Helpline', value:'Helpline'},
+ { label:'Field Visit', value:'Field Visit'},
+ { label:'NGO Request', value:'NGO Request'},
+ { label:'School', value:'School'},
+ { label:'Hospital', value:'Hospital'},
+ { label:'Government', value:'Government'},
+ { label:'Parent Walk-in', value:'Parent Walk-in'},
+ { label:'Reference', value:'Reference'},
+ { label:'Other', value:'Other'}
+ ];
 
  const classificationOptions = [
  { label:'All Classifications', value:'All'},
@@ -248,21 +264,24 @@ export const Children: React.FC = () => {
 
  const disabilityOptions = [
  { label:'All Disabilities', value:'All'},
- { label:'Autism Spectrum', value:'Autism'},
- { label:'Down Syndrome', value:'Down Syndrome'},
- { label:'ADHD', value:'ADHD'},
+ { label:'Autism', value:'Autism'},
  { label:'Intellectual Disability', value:'Intellectual Disability'},
- { label:'Speech Delay', value:'Speech Delay'},
- { label:'Development Delay', value:'Development Delay'},
+ { label:'Cerebral Palsy', value:'Cerebral Palsy'},
+ { label:'ADHD', value:'ADHD'},
+ { label:'Down Syndrome', value:'Down Syndrome'},
  { label:'Learning Disability', value:'Learning Disability'},
- { label:'Other', value:'Other'}
+ { label:'Hearing Impairment', value:'Hearing Impairment'},
+ { label:'Visual Impairment', value:'Visual Impairment'},
+ { label:'Multiple Disability', value:'Multiple Disability'},
+ { label:'Others', value:'Others'}
  ];
 
  const severityOptions = [
  { label:'All Severities', value:'All'},
  { label:'Mild', value:'Mild'},
  { label:'Moderate', value:'Moderate'},
- { label:'Severe', value:'Severe'}
+ { label:'Severe', value:'Severe'},
+ { label:'Profound', value:'Profound'}
  ];
 
  const journeyOptions = [
@@ -380,7 +399,7 @@ export const Children: React.FC = () => {
  </div>
  <div>
  <span 
- onClick={() => navigate(`/children/${c.id}`)}
+ onClick={() => navigate(`/renu/children/${c.id}`)}
  className="font-bold text-slate-900 group-hover:text-indigo-600 hover:underline transition-colors cursor-pointer"
  >
  {c.name}
@@ -428,7 +447,7 @@ export const Children: React.FC = () => {
  <Button
  variant="secondary"
  size="sm"
- onClick={() => navigate(`/children/${c.id}`)}
+ onClick={() => navigate(`/renu/children/${c.id}`)}
  className="flex items-center gap-1 cursor-pointer ml-auto"
  >
  Profile <ChevronRight className="h-3.5 w-3.5"/>
@@ -548,6 +567,16 @@ export const Children: React.FC = () => {
  value={formData.campId}
  onChange={e => handleCampChange(e.target.value)}
  required
+ />
+ </div>
+ </div>
+ <div className="grid grid-cols-1 gap-4">
+ <div>
+ <Label>Registration Source</Label>
+ <Select
+ options={registrationSourceOptions}
+ value={formData.registrationSource}
+ onChange={e => setFormData({ ...formData, registrationSource: e.target.value as any })}
  />
  </div>
  </div>
@@ -721,7 +750,11 @@ export const Children: React.FC = () => {
  { label:'Speech Delay', value:'Speech Delay'},
  { label:'Development Delay', value:'Development Delay'},
  { label:'Learning Disability', value:'Learning Disability'},
- { label:'Other', value:'Other'},
+ { label:'Cerebral Palsy', value:'Cerebral Palsy'},
+ { label:'Hearing Impairment', value:'Hearing Impairment'},
+ { label:'Visual Impairment', value:'Visual Impairment'},
+ { label:'Multiple Disability', value:'Multiple Disability'},
+ { label:'Other', value:'Others'},
  ]}
  value={formData.disabilityType}
  onChange={e => setFormData({ ...formData, disabilityType: e.target.value as any })}
@@ -734,6 +767,7 @@ export const Children: React.FC = () => {
  { label:'Mild', value:'Mild'},
  { label:'Moderate', value:'Moderate'},
  { label:'Severe', value:'Severe'},
+ { label:'Profound', value:'Profound'},
  ]}
  value={formData.severity}
  onChange={e => setFormData({ ...formData, severity: e.target.value as any })}

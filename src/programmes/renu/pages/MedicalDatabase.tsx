@@ -66,9 +66,16 @@ export const MedicalDatabase: React.FC = () => {
             <Select 
               options={[
                 {label: 'All Types', value: 'All'},
-                {label: 'Medical Report', value: 'Medical Report'},
-                {label: 'Assessment Report', value: 'Assessment Report'},
-                {label: 'Therapy Recommendation', value: 'Therapy Recommendation'},
+                {label: 'MRI', value: 'MRI'},
+                {label: 'CT Scan', value: 'CT Scan'},
+                {label: 'EEG', value: 'EEG'},
+                {label: 'BERA', value: 'BERA'},
+                {label: 'Blood Report', value: 'Blood Report'},
+                {label: 'Genetic Test', value: 'Genetic Test'},
+                {label: 'Hearing Test', value: 'Hearing Test'},
+                {label: 'Vision Test', value: 'Vision Test'},
+                {label: 'Thyroid Report', value: 'Thyroid Report'},
+                {label: 'Vitamin Reports', value: 'Vitamin Reports'},
               ]}
               value={recordType}
               onChange={e => setRecordType(e.target.value)}

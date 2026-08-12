@@ -3,7 +3,7 @@ import { useParams, useNavigate } from'react-router-dom';
 import { RenuStore } from'../data/renuStore';
 import { useRole } from'../../../hooks/useRole';
 import { showToast } from'../../../hooks/useToast';
-import { Child, FollowUp, Diagnosis, TherapyCentre, Sponsorship, ChildJourneyStatus, MockDocument, SchoolAdmissionDetails, TherapyProgressDetails } from'../types';
+import { Child, FollowUp, Diagnosis, TherapyCentre, Sponsorship, ChildJourneyStatus, MockDocument, SchoolAdmissionDetails, TherapyProgressDetails, FamilyDetails } from'../types';
 import { Card, Badge, Button, Input, Select, Label, Textarea, Modal } from'../../../components/ui';
 import { RenuJourneyTracker } from'../../../components/common/RenuJourneyTracker';
 import {
@@ -489,43 +489,101 @@ export const ChildProfile: React.FC = () => {
  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
  {/* Parent Details */}
  <div>
- <Label className="mb-2">Parent / Guardian Information</Label>
- <div className="space-y-2 p-3 bg-slate-50/50 border border-slate-100/50 rounded-xl">
- <div>
- <span className="text-[9px] text-slate-400 font-bold block uppercase">Father Name</span>
- <span className="font-bold text-slate-800">{child.fatherName}</span>
- </div>
- <div>
- <span className="text-[9px] text-slate-400 font-bold block uppercase">Mother Name</span>
- <span className="font-bold text-slate-800">{child.motherName}</span>
- </div>
- {child.guardianName && (
- <div>
- <span className="text-[9px] text-slate-400 font-bold block uppercase">Guardian Name</span>
- <span className="font-bold text-slate-800">{child.guardianName}</span>
- </div>
- )}
- </div>
- </div>
+ <Label className="mb-2">Demographics & Contact</Label>
+              <div className="space-y-4 p-3 bg-slate-50/50 border border-slate-100/50 rounded-xl">
+                <div className="flex gap-4 items-center">
+                  <div className="flex-1 grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-[10px]">UDID No.</Label>
+                      <Input value={child.udidNo || ''} onChange={e => saveChildUpdates({ udidNo: e.target.value })} className="h-7 text-xs" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Blood Group</Label>
+                      <Input value={child.bloodGroup || ''} onChange={e => saveChildUpdates({ bloodGroup: e.target.value })} className="h-7 text-xs" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Religion</Label>
+                      <Input value={child.religion || ''} onChange={e => saveChildUpdates({ religion: e.target.value })} className="h-7 text-xs" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">District</Label>
+                      <Input value={child.district || ''} onChange={e => saveChildUpdates({ district: e.target.value })} className="h-7 text-xs" />
+                    </div>
+                  </div>
+                  <div className="w-24 text-center">
+                    <div className="h-20 w-20 rounded border-2 border-dashed border-slate-300 mx-auto flex items-center justify-center overflow-hidden bg-slate-100">
+                      {child.photo && child.photo.startsWith('http') ? <img src={child.photo} className="h-full w-full object-cover" /> : <User className="h-8 w-8 text-slate-400" />}
+                    </div>
+                    <div className="mt-1">
+                      <FakeUpload status={child.photo ? 'Uploaded' : ''} onUpload={(status) => saveChildUpdates({ photo: status })} />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-[10px]">Registration Source</Label>
+                  <Select 
+                    className="h-7 text-xs"
+                    value={child.registrationSource || ''} 
+                    onChange={e => saveChildUpdates({ registrationSource: e.target.value as any })}
+                    options={[{label: 'Select Source', value: ''}, 'Medical Camp', 'Helpline', 'Field Visit', 'NGO Request', 'School', 'Hospital', 'Government', 'Parent Walk-in', 'Reference', 'Other'].map(o => typeof o === 'string' ? {label: o, value: o} : o)}
+                  />
+                </div>
+              </div>
+            </div>
 
- {/* Address details */}
- <div>
- <Label className="mb-2">Address & Area Location</Label>
- <div className="space-y-2 p-3 bg-slate-50/50 border border-slate-100/50 rounded-xl">
- <div>
- <span className="text-[9px] text-slate-400 font-bold block uppercase">Local Area / Slum Settlement</span>
- <span className="font-bold text-slate-800">{child.area}, {child.city}</span>
- </div>
- <div>
- <span className="text-[9px] text-slate-400 font-bold block uppercase">Street Address</span>
- <span className="font-bold text-slate-800">{child.address}</span>
- </div>
- <div>
- <span className="text-[9px] text-slate-400 font-bold block uppercase">Pincode</span>
- <span className="font-bold text-slate-800">{child.pincode}</span>
- </div>
- </div>
- </div>
+            <div>
+              <Label className="mb-2">Address & Area Location</Label>
+              <div className="space-y-2 p-3 bg-slate-50/50 border border-slate-100/50 rounded-xl">
+                <div>
+                  <span className="text-[9px] text-slate-400 font-bold block uppercase">Local Area / Slum Settlement</span>
+                  <span className="font-bold text-slate-800">{child.area}, {child.city}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] text-slate-400 font-bold block uppercase">Street Address</span>
+                  <span className="font-bold text-slate-800">{child.address}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] text-slate-400 font-bold block uppercase">Pincode</span>
+                  <span className="font-bold text-slate-800">{child.pincode}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="col-span-1 md:col-span-2">
+              <Label className="mb-2 mt-2">Family & Guardian Information</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {['father', 'mother', 'guardian'].map((role) => (
+                  <div key={role} className="p-3 bg-slate-50/50 border border-slate-100/50 rounded-xl space-y-2">
+                    <span className="text-[10px] text-brand-cyan-700 font-bold uppercase">{role} Details</span>
+                    <div><Label className="text-[9px]">Name</Label><Input value={(child.familyDetails?.[role as "father" | "mother" | "guardian"] as any)?.name || ''} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, [role]: { ...(child.familyDetails?.[role as "father" | "mother" | "guardian"] as any), name: e.target.value } } })} className="h-6 text-[10px]" /></div>
+                    <div><Label className="text-[9px]">Education</Label><Input value={(child.familyDetails?.[role as "father" | "mother" | "guardian"] as any)?.education || ''} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, [role]: { ...(child.familyDetails?.[role as "father" | "mother" | "guardian"] as any), education: e.target.value } } })} className="h-6 text-[10px]" /></div>
+                    <div><Label className="text-[9px]">Occupation</Label><Input value={(child.familyDetails?.[role as "father" | "mother" | "guardian"] as any)?.occupation || ''} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, [role]: { ...(child.familyDetails?.[role as "father" | "mother" | "guardian"] as any), occupation: e.target.value } } })} className="h-6 text-[10px]" /></div>
+                    <div><Label className="text-[9px]">Mobile</Label><Input value={(child.familyDetails?.[role as "father" | "mother" | "guardian"] as any)?.mobile || ''} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, [role]: { ...(child.familyDetails?.[role as "father" | "mother" | "guardian"] as any), mobile: e.target.value } } })} className="h-6 text-[10px]" /></div>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="p-3 bg-slate-50/50 border border-slate-100/50 rounded-xl">
+                  <span className="text-[10px] text-brand-cyan-700 font-bold uppercase block mb-2">Family Income</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><Label className="text-[9px]">Annual Income</Label><Input type="number" value={child.familyDetails?.annualIncome || ''} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, annualIncome: Number(e.target.value) } })} className="h-6 text-[10px]" /></div>
+                    <div><Label className="text-[9px]">Members Count</Label><Input type="number" value={child.familyDetails?.familyMembersCount || ''} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, familyMembersCount: Number(e.target.value) } })} className="h-6 text-[10px]" /></div>
+                    <div className="flex items-center gap-2 mt-2"><input type="checkbox" checked={child.familyDetails?.bplStatus || false} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, bplStatus: e.target.checked } })} /> <Label className="mb-0 text-[10px]">BPL Status</Label></div>
+                    <div className="flex items-center gap-2 mt-2"><input type="checkbox" checked={child.familyDetails?.rationCard || false} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, rationCard: e.target.checked } })} /> <Label className="mb-0 text-[10px]">Ration Card</Label></div>
+                    <div className="col-span-2 mt-1">
+                      <Label className="text-[9px]">Socio-economic Status</Label>
+                      <Select className="h-6 text-[10px]" value={child.familyDetails?.socioEconomicStatus || ''} onChange={e => saveChildUpdates({ familyDetails: { ...child.familyDetails, socioEconomicStatus: e.target.value as any } })} options={[{label: 'Select', value: ''}, 'Low', 'Lower Middle', 'Middle', 'Upper'].map(o => typeof o === 'string' ? {label: o, value: o} : o)} />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 bg-slate-50/50 border border-slate-100/50 rounded-xl">
+                  <span className="text-[10px] text-brand-cyan-700 font-bold uppercase block mb-2">Emergency Contact</span>
+                  <div><Label className="text-[9px]">Name</Label><Input value={child.emergencyContact?.name || ''} onChange={e => saveChildUpdates({ emergencyContact: { ...child.emergencyContact, name: e.target.value } })} className="h-6 text-[10px] mb-2" /></div>
+                  <div><Label className="text-[9px]">Relation</Label><Input value={child.emergencyContact?.relation || ''} onChange={e => saveChildUpdates({ emergencyContact: { ...child.emergencyContact, relation: e.target.value } })} className="h-6 text-[10px] mb-2" /></div>
+                  <div><Label className="text-[9px]">Mobile</Label><Input value={child.emergencyContact?.mobile || ''} onChange={e => saveChildUpdates({ emergencyContact: { ...child.emergencyContact, mobile: e.target.value } })} className="h-6 text-[10px]" /></div>
+                </div>
+              </div>
+            </div>
  </div>
 
  {/* School Enrollment & Readiness status */}
@@ -565,10 +623,23 @@ export const ChildProfile: React.FC = () => {
  <span className="text-[9px] text-slate-400 font-bold block uppercase">Assessment Score</span>
  <span className="text-base font-extrabold text-brand-cyan-800 mt-0.5 block">{diagnosis?.assessmentScore ||'Pending'} / 100</span>
  </div>
- <div className="p-3 bg-slate-50/50 border border-slate-100/50 rounded-lg col-span-2 text-left">
- <span className="text-[9px] text-slate-400 font-bold block uppercase pl-1">Assessment Centre</span>
- <span className="font-bold text-slate-800 mt-0.5 block truncate pl-1">{diagnosis?.centreName ||'No Clinic Assigned'}</span>
- </div>
+ <div className="p-3 bg-slate-50/50 border border-slate-100/50 rounded-lg col-span-2 text-left space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div><Label className="text-[9px]">Primary Diagnosis</Label><Input value={child.primaryDiagnosis || ''} onChange={e => saveChildUpdates({ primaryDiagnosis: e.target.value })} className="h-6 text-[10px]" /></div>
+                      <div><Label className="text-[9px]">Secondary Diagnosis</Label><Input value={child.secondaryDiagnosis || ''} onChange={e => saveChildUpdates({ secondaryDiagnosis: e.target.value })} className="h-6 text-[10px]" /></div>
+                    </div>
+                    <div><Label className="text-[9px]">Co-morbidities</Label><Input value={child.coMorbidities || ''} onChange={e => saveChildUpdates({ coMorbidities: e.target.value })} className="h-6 text-[10px]" /></div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[9px]">Severity</Label>
+                        <Select className="h-6 text-[10px]" value={child.severity || ''} onChange={e => saveChildUpdates({ severity: e.target.value as any })} options={[{label: 'Select', value: ''}, 'Mild', 'Moderate', 'Severe', 'Profound'].map(o => typeof o === 'string' ? {label: o, value: o} : o)} />
+                      </div>
+                      <div>
+                        <Label className="text-[9px]">Disability Type</Label>
+                        <Select className="h-6 text-[10px]" value={child.disabilityType || ''} onChange={e => saveChildUpdates({ disabilityType: e.target.value as any })} options={[{label: 'Select', value: ''}, 'Autism', 'Intellectual Disability', 'Cerebral Palsy', 'ADHD', 'Down Syndrome', 'Learning Disability', 'Hearing Impairment', 'Visual Impairment', 'Multiple Disability', 'Others'].map(o => typeof o === 'string' ? {label: o, value: o} : o)} />
+                      </div>
+                    </div>
+                  </div>
  </div>
  <div className="p-3 bg-slate-50/50 border border-slate-100/50 rounded-lg">
  <span className="text-[9px] text-slate-400 font-bold block uppercase">Clinical Assessment outcome Remarks</span>
@@ -785,37 +856,48 @@ export const ChildProfile: React.FC = () => {
 
  {/* Parent Communication Calls log Timeline */}
  <Card className="p-5">
- <div className="flex justify-between items-center mb-3">
- <h3 className="font-bold text-slate-900 flex items-center gap-1.5 font-display">
- <PhoneCall className="h-4 w-4 text-brand-cyan-700"/> Parent Communication log
- </h3>
- <Button size="sm"variant="outline"onClick={() => setIsFollowUpModalOpen(true)} className="py-0.5 px-2 text-[10px] cursor-pointer">
- Log Call/Visit
- </Button>
- </div>
+              <h3 className="font-bold text-slate-900 flex items-center gap-1.5 font-display mb-3">
+                <FileCheck className="h-4 w-4 text-brand-cyan-700" /> Required Documents
+              </h3>
+              <div className="space-y-3 mb-6">
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center">
+                  <div><span className="font-bold text-xs">Birth Certificate</span></div>
+                  <FakeUpload status={child.birthCertificateFileName ? 'Uploaded' : ''} onUpload={(status) => saveChildUpdates({ birthCertificateFileName: status })} />
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center">
+                  <div><span className="font-bold text-xs">Aadhaar Card</span></div>
+                  <FakeUpload status={child.aadhaarCardFileName ? 'Uploaded' : ''} onUpload={(status) => saveChildUpdates({ aadhaarCardFileName: status })} />
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center">
+                  <div><span className="font-bold text-xs">Disability Certificate</span></div>
+                  <FakeUpload status={child.disabilityCertificatesFileName ? 'Uploaded' : ''} onUpload={(status) => saveChildUpdates({ disabilityCertificatesFileName: status })} />
+                </div>
+              </div>
 
- {followups.length === 0 ? (
- <p className="text-slate-400 italic text-center py-4">No follow-ups recorded.</p>
- ) : (
- <div className="space-y-3.5 max-h-60 overflow-y-auto pr-1">
- {followups.map(f => (
- <div key={f.id} className="p-2.5 bg-slate-50/50 border border-slate-100/50 rounded-lg space-y-1.5">
- <div className="flex justify-between items-center text-[9px] text-slate-400 font-bold uppercase">
- <span>{f.date}</span>
- <Badge color="primary"variant="soft"className="scale-90">{f.communicationType ||'Home Visit'}</Badge>
- </div>
- <p className="font-bold text-slate-800 leading-tight">Notes:"{f.notes}"</p>
- <p className="text-[10px] text-slate-500 italic">Discussion:"{f.parentDiscussion}"</p>
- {f.actionItems && (
- <p className="text-[9px] text-brand-cyan-800 font-semibold leading-normal">
- Action: {f.actionItems}
- </p>
- )}
- </div>
- ))}
- </div>
- )}
- </Card>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-bold text-slate-900 flex items-center gap-1.5 font-display">
+                  <FileText className="h-4 w-4 text-brand-cyan-700" /> Additional Documents
+                </h3>
+                <Button size="sm" variant="outline" onClick={() => setIsDocModalOpen(true)} className="py-0.5 px-2 text-[10px]">Attach</Button>
+              </div>
+              <div className="space-y-2">
+                {!child.documents || child.documents.length === 0 ? (
+                  <p className="text-slate-400 italic text-center py-3 text-xs">No additional documents.</p>
+                ) : (
+                  child.documents.map(doc => (
+                    <div key={doc.id} className="p-2.5 bg-slate-50/50 border border-slate-100/50 rounded-lg flex items-center justify-between">
+                      <div className="min-w-0 pr-2">
+                        <div className="font-bold text-slate-800 text-xs truncate">{doc.name}</div>
+                        <div className="text-[9px] text-slate-400 mt-0.5">{doc.type} • {doc.date}</div>
+                      </div>
+                      <button type="button" onClick={() => handleDeleteDocument(doc.id)} className="p-1 text-slate-400 hover:text-red-500">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
 
  {/* Document Uploads manager */}
  <Card className="p-5">
@@ -856,7 +938,7 @@ export const ChildProfile: React.FC = () => {
  {/* NEW TABS SECTION */}
   <Card className="p-0 overflow-hidden">
     <div className="flex overflow-x-auto whitespace-nowrap border-b border-slate-200 bg-slate-50 sticky top-0 z-10">
-      {['assessment', 'medical', 'iep', 'financial', 'devices', 'homevisit'].map(tab => (
+      {['enrollment', 'therapy', 'assessment', 'medical', 'iep', 'milestones', 'financial', 'devices', 'homevisit'].map(tab => (
         <button
           key={tab}
           onClick={() => setActiveTab(tab)}
@@ -864,17 +946,243 @@ export const ChildProfile: React.FC = () => {
             activeTab === tab ? 'text-brand-cyan-700 border-b-2 border-brand-cyan-700 bg-white' : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          {tab === 'homevisit' ? 'Parent & Home Visit Log' : 
-           tab === 'medical' ? 'Medical Records' : 
+          {tab === 'homevisit' ? 'Parent & Visit' : 
+           tab === 'medical' ? 'Medical' : 
            tab === 'iep' ? 'IEP' : 
-           tab === 'financial' ? 'Financial Support' : 
-           tab === 'devices' ? 'Assistive Devices' : 'Assessment'}
+           tab === 'financial' ? 'Financial' : 
+           tab === 'devices' ? 'Devices' : 
+           tab === 'enrollment' ? 'Enrollment' :
+           tab === 'therapy' ? 'Therapy' :
+           tab === 'milestones' ? 'Milestones' :
+           'Assessment'}
         </button>
       ))}
     </div>
     <div className="p-6 bg-white min-h-[400px]">
       
-      {/* TAB 1: ASSESSMENT */}
+      
+      {/* TAB 1: ENROLLMENT */}
+      {activeTab === 'enrollment' && (
+        <div className="space-y-6">
+          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Enrollment Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+            <div>
+              <Label>Admission Date</Label>
+              <Input type="date" value={child.enrollmentDetails?.admissionDate || ''} onChange={e => saveChildUpdates({ enrollmentDetails: { ...child.enrollmentDetails, admissionDate: e.target.value } })} />
+            </div>
+            <div>
+              <Label>Current Status</Label>
+              <Select value={child.enrollmentDetails?.currentStatus || ''} onChange={e => saveChildUpdates({ enrollmentDetails: { ...child.enrollmentDetails, currentStatus: e.target.value as any } })} options={[{label:'Select',value:''},'Active','Hold','Completed','Dropout','Shifted','Expired'].map(o=>typeof o==='string'?{label:o,value:o}:o)} />
+            </div>
+            {['Dropout', 'Shifted', 'Expired'].includes(child.enrollmentDetails?.currentStatus || '') && (
+              <div className="md:col-span-2">
+                <Label>Reason for Exit</Label>
+                <Input value={child.enrollmentDetails?.reasonForExit || ''} onChange={e => saveChildUpdates({ enrollmentDetails: { ...child.enrollmentDetails, reasonForExit: e.target.value } })} />
+              </div>
+            )}
+            <div>
+              <Label>Sponsorship Status</Label>
+              <Input value={child.enrollmentDetails?.sponsorshipStatus || ''} onChange={e => saveChildUpdates({ enrollmentDetails: { ...child.enrollmentDetails, sponsorshipStatus: e.target.value } })} />
+            </div>
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200">
+              <div>
+                <Label className="text-xs">Admission Form</Label>
+                <FakeUpload status={child.enrollmentDetails?.admissionFormFileName ? 'Uploaded' : ''} onUpload={(status) => saveChildUpdates({ enrollmentDetails: { ...child.enrollmentDetails, admissionFormFileName: status } })} />
+              </div>
+              <div>
+                <Label className="text-xs">Consent Form</Label>
+                <FakeUpload status={child.enrollmentDetails?.consentFormFileName ? 'Uploaded' : ''} onUpload={(status) => saveChildUpdates({ enrollmentDetails: { ...child.enrollmentDetails, consentFormFileName: status } })} />
+              </div>
+              <div>
+                <Label className="text-xs">Parent Consent</Label>
+                <FakeUpload status={child.enrollmentDetails?.parentConsentFileName ? 'Uploaded' : ''} onUpload={(status) => saveChildUpdates({ enrollmentDetails: { ...child.enrollmentDetails, parentConsentFileName: status } })} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: THERAPY */}
+      {activeTab === 'therapy' && (
+        <div className="space-y-8">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Therapy Assignments</h3>
+              <Button size="sm" onClick={() => {
+                const newAssignment = { id: `TA-${Date.now()}`, therapyType: 'Occupational Therapy' as any, required: true, frequency: '', sessionTime: '', sessionDuration: '' };
+                saveChildUpdates({ therapyAssignments: [...(child.therapyAssignments || []), newAssignment] });
+              }}><Plus className="h-4 w-4 mr-1" /> Add Therapy</Button>
+            </div>
+            <div className="space-y-4">
+              {(child.therapyAssignments || []).map((ta, idx) => (
+                <div key={ta.id} className="p-4 bg-slate-50 border border-slate-100 rounded-xl relative">
+                  <button onClick={() => {
+                    const newArr = [...(child.therapyAssignments || [])];
+                    newArr.splice(idx, 1);
+                    saveChildUpdates({ therapyAssignments: newArr });
+                  }} className="absolute top-2 right-2 text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="col-span-2">
+                      <Label className="text-[10px]">Therapy Type</Label>
+                      <Select value={ta.therapyType} onChange={e => {
+                        const newArr = [...(child.therapyAssignments || [])];
+                        newArr[idx].therapyType = e.target.value as any;
+                        saveChildUpdates({ therapyAssignments: newArr });
+                      }} options={['Occupational Therapy', 'Speech Therapy', 'Behaviour Therapy', 'Physiotherapy', 'Special Education', 'Early Intervention', 'Parent Training', 'Group Therapy', 'ADL', 'Life Skills'].map(o=>({label:o,value:o}))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Required</Label>
+                      <div className="mt-2 flex items-center"><input type="checkbox" checked={ta.required} onChange={e => {
+                        const newArr = [...(child.therapyAssignments || [])];
+                        newArr[idx].required = e.target.checked;
+                        saveChildUpdates({ therapyAssignments: newArr });
+                      }} className="mr-2"/> Yes</div>
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Frequency</Label>
+                      <Input value={ta.frequency || ''} onChange={e => {
+                        const newArr = [...(child.therapyAssignments || [])];
+                        newArr[idx].frequency = e.target.value;
+                        saveChildUpdates({ therapyAssignments: newArr });
+                      }} placeholder="e.g. 3x/week" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Time</Label>
+                      <Input value={ta.sessionTime || ''} onChange={e => {
+                        const newArr = [...(child.therapyAssignments || [])];
+                        newArr[idx].sessionTime = e.target.value;
+                        saveChildUpdates({ therapyAssignments: newArr });
+                      }} placeholder="10:00 AM" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Duration</Label>
+                      <Input value={ta.sessionDuration || ''} onChange={e => {
+                        const newArr = [...(child.therapyAssignments || [])];
+                        newArr[idx].sessionDuration = e.target.value;
+                        saveChildUpdates({ therapyAssignments: newArr });
+                      }} placeholder="45 min" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Monthly Attendance & Financial Tracking</h3>
+              <Button size="sm" onClick={() => {
+                const newRec = { id: `MA-${Date.now()}`, year: new Date().getFullYear(), month: 'Jan', totalDaysSuggested: 0, totalDaysAttended: 0, totalDaysMissed: 0, attendancePercentage: 0, qualifiedForFinancialSupport: false };
+                saveChildUpdates({ monthlyAttendanceRecords: [...(child.monthlyAttendanceRecords || []), newRec] });
+              }}><Plus className="h-4 w-4 mr-1" /> Add Month</Button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs whitespace-nowrap">
+                <thead className="bg-slate-100 text-slate-600 font-semibold">
+                  <tr>
+                    <th className="p-2 rounded-tl-lg">Year</th>
+                    <th className="p-2">Month</th>
+                    <th className="p-2">Suggested</th>
+                    <th className="p-2">Attended</th>
+                    <th className="p-2">Missed</th>
+                    <th className="p-2">Attendance %</th>
+                    <th className="p-2">Support Qual.</th>
+                    <th className="p-2">Note</th>
+                    <th className="p-2 rounded-tr-lg"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {(child.monthlyAttendanceRecords || []).map((rec, idx) => (
+                    <tr key={rec.id} className="hover:bg-slate-50/50">
+                      <td className="p-2"><Input type="number" className="w-20 text-xs p-1 h-7" value={rec.year} onChange={e => {
+                        const newArr = [...(child.monthlyAttendanceRecords || [])];
+                        newArr[idx].year = Number(e.target.value);
+                        saveChildUpdates({ monthlyAttendanceRecords: newArr });
+                      }} /></td>
+                      <td className="p-2"><Select className="w-24 text-xs p-1 h-7" value={rec.month} onChange={e => {
+                        const newArr = [...(child.monthlyAttendanceRecords || [])];
+                        newArr[idx].month = e.target.value;
+                        saveChildUpdates({ monthlyAttendanceRecords: newArr });
+                      }} options={['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map(o=>({label:o,value:o}))} /></td>
+                      <td className="p-2"><Input type="number" className="w-16 text-xs p-1 h-7" value={rec.totalDaysSuggested} onChange={e => {
+                        const newArr = [...(child.monthlyAttendanceRecords || [])];
+                        newArr[idx].totalDaysSuggested = Number(e.target.value);
+                        newArr[idx].totalDaysMissed = newArr[idx].totalDaysSuggested - newArr[idx].totalDaysAttended;
+                        newArr[idx].attendancePercentage = newArr[idx].totalDaysSuggested > 0 ? (newArr[idx].totalDaysAttended / newArr[idx].totalDaysSuggested) * 100 : 0;
+                        saveChildUpdates({ monthlyAttendanceRecords: newArr });
+                      }} /></td>
+                      <td className="p-2"><Input type="number" className="w-16 text-xs p-1 h-7" value={rec.totalDaysAttended} onChange={e => {
+                        const newArr = [...(child.monthlyAttendanceRecords || [])];
+                        newArr[idx].totalDaysAttended = Number(e.target.value);
+                        newArr[idx].totalDaysMissed = newArr[idx].totalDaysSuggested - newArr[idx].totalDaysAttended;
+                        newArr[idx].attendancePercentage = newArr[idx].totalDaysSuggested > 0 ? (newArr[idx].totalDaysAttended / newArr[idx].totalDaysSuggested) * 100 : 0;
+                        saveChildUpdates({ monthlyAttendanceRecords: newArr });
+                      }} /></td>
+                      <td className="p-2 font-bold">{rec.totalDaysMissed}</td>
+                      <td className="p-2">
+                        {rec.attendancePercentage.toFixed(1)}%
+                        {rec.attendancePercentage < 70 && rec.totalDaysSuggested > 0 && <span className="ml-2 text-[9px] bg-red-100 text-red-600 px-1 py-0.5 rounded font-bold">⚠ Below 70%</span>}
+                      </td>
+                      <td className="p-2 text-center"><input type="checkbox" checked={rec.qualifiedForFinancialSupport} onChange={e => {
+                        const newArr = [...(child.monthlyAttendanceRecords || [])];
+                        newArr[idx].qualifiedForFinancialSupport = e.target.checked;
+                        saveChildUpdates({ monthlyAttendanceRecords: newArr });
+                      }} /></td>
+                      <td className="p-2"><Input className="w-32 text-xs p-1 h-7" value={rec.monthlyNote || ''} onChange={e => {
+                        const newArr = [...(child.monthlyAttendanceRecords || [])];
+                        newArr[idx].monthlyNote = e.target.value;
+                        saveChildUpdates({ monthlyAttendanceRecords: newArr });
+                      }} /></td>
+                      <td className="p-2"><button onClick={() => {
+                        const newArr = [...(child.monthlyAttendanceRecords || [])];
+                        newArr.splice(idx, 1);
+                        saveChildUpdates({ monthlyAttendanceRecords: newArr });
+                      }} className="text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2 mb-4">Travel Financial Support</h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+              <div><Label>Center Name</Label><Input value={child.travelSupport?.centerName || ''} onChange={e => saveChildUpdates({ travelSupport: { ...child.travelSupport, centerName: e.target.value } })} /></div>
+              <div><Label>Distance (KM)</Label><Input type="number" value={child.travelSupport?.distanceKm || ''} onChange={e => saveChildUpdates({ travelSupport: { ...child.travelSupport, distanceKm: Number(e.target.value) } })} /></div>
+              <div><Label>Support Slab</Label><Select value={child.travelSupport?.slab || ''} onChange={e => saveChildUpdates({ travelSupport: { ...child.travelSupport, slab: e.target.value as any } })} options={[{label:'Select',value:''},'₹500','₹1000','Other'].map(o=>typeof o==='string'?{label:o,value:o}:o)} /></div>
+              {child.travelSupport?.slab === 'Other' && <div><Label>Other Amount</Label><Input type="number" value={child.travelSupport?.otherAmount || ''} onChange={e => saveChildUpdates({ travelSupport: { ...child.travelSupport, otherAmount: Number(e.target.value) } })} /></div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 6: MILESTONES */}
+      {activeTab === 'milestones' && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Developmental Milestones</h3>
+          <div className="grid gap-3">
+            {['Early Intervention','Inclusive Education','Independent Living Skills','Communication','Self Care','Behaviour','Social Skills','Vocational Training','School Readiness','School Admission','Employment'].map((domain) => {
+              const current = child.developmentalMilestones?.find(m => m.domain === domain) || { domain: domain as any, progress: 'Not Started', remarks: '', lastUpdated: new Date().toISOString().split('T')[0] };
+              return (
+                <div key={domain} className="p-3 bg-slate-50 border border-slate-100 rounded-lg flex flex-wrap gap-4 items-center">
+                  <div className="w-48 font-bold text-xs text-slate-700">{domain}</div>
+                  <Select className="w-36 h-7 text-xs" value={current.progress} onChange={e => {
+                    const existing = [...(child.developmentalMilestones || [])].filter(m => m.domain !== domain);
+                    saveChildUpdates({ developmentalMilestones: [...existing, { ...current, progress: e.target.value as any, lastUpdated: new Date().toISOString().split('T')[0] }] });
+                  }} options={[{label:'Not Started',value:'Not Started'},{label:'In Progress',value:'In Progress'},{label:'Achieved',value:'Achieved'}]} />
+                  <Input className="flex-1 min-w-[200px] h-7 text-xs" placeholder="Remarks..." value={current.remarks || ''} onChange={e => {
+                    const existing = [...(child.developmentalMilestones || [])].filter(m => m.domain !== domain);
+                    saveChildUpdates({ developmentalMilestones: [...existing, { ...current, remarks: e.target.value }] });
+                  }} />
+                  <div className="w-24 text-[9px] text-slate-400">Updated: {current.lastUpdated}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+{/* TAB 1: ASSESSMENT */}
       {activeTab === 'assessment' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -901,7 +1209,7 @@ export const ChildProfile: React.FC = () => {
                   <div>
                     <Label className="text-[10px]">Type</Label>
                     <Select 
-                      options={[{label: 'IQ', value: 'IQ'}, {label: 'Functional', value: 'Functional'}, {label: 'Behaviour', value: 'Behaviour'}, {label: 'Motor', value: 'Motor'}]}
+                      options={[{label: 'Initial', value: 'Initial'}, {label: 'Developmental', value: 'Developmental'}, {label: 'IQ', value: 'IQ'}, {label: 'Functional', value: 'Functional'}, {label: 'Behaviour', value: 'Behaviour'}, {label: 'Communication', value: 'Communication'}, {label: 'Motor', value: 'Motor'}, {label: 'Sensory Profile', value: 'Sensory Profile'}, {label: 'ADL', value: 'ADL'}]}
                       value={assessment.type}
                       onChange={e => {
                         const newArr = [...(child.assessments || [])];
@@ -932,7 +1240,7 @@ export const ChildProfile: React.FC = () => {
                       }}
                     />
                   </div>
-                  {assessment.type === 'IQ' && (
+                  {true && (
                     <div>
                       <Label className="text-[10px]">Score</Label>
                       <Input type="number" value={assessment.score || ''} onChange={e => {
@@ -989,9 +1297,9 @@ export const ChildProfile: React.FC = () => {
           {/* Scans */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Scan Records (MRI/CT/EEG)</h3>
+              <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Medical Scan & Test Records</h3>
               <Button size="sm" onClick={() => {
-                const newScan = { date: '', type: 'MRI', finding: '', centre: '', doctor: '' };
+                const newScan = { id: `scan_${Date.now()}`, date: '', type: 'MRI' as const, finding: '', centre: '', doctor: '' };
                 const scans = [...(child.medicalRecords?.scans || []), newScan];
                 saveChildUpdates({ medicalRecords: { ...child.medicalRecords, scans } });
               }}>
@@ -1013,7 +1321,7 @@ export const ChildProfile: React.FC = () => {
                      <div>
                        <Label className="text-[10px]">Type</Label>
                        <Select 
-                         options={[{label: 'MRI', value: 'MRI'}, {label: 'CT', value: 'CT'}, {label: 'EEG', value: 'EEG'}, {label: 'Other', value: 'Other'}]}
+                         options={[{label: 'MRI', value: 'MRI'}, {label: 'CT Scan', value: 'CT Scan'}, {label: 'EEG', value: 'EEG'}, {label: 'BERA', value: 'BERA'}, {label: 'Blood Report', value: 'Blood Report'}, {label: 'Genetic Test', value: 'Genetic Test'}, {label: 'Hearing Test', value: 'Hearing Test'}, {label: 'Vision Test', value: 'Vision Test'}, {label: 'Thyroid Report', value: 'Thyroid Report'}, {label: 'Vitamin Reports', value: 'Vitamin Reports'}, {label: 'Other', value: 'Other'}]}
                          value={scan.type}
                          onChange={e => {
                            const scans = [...(child.medicalRecords?.scans || [])];
@@ -1072,7 +1380,7 @@ export const ChildProfile: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Prescription Records</h3>
               <Button size="sm" onClick={() => {
-                const newRecord = { date: '', doctorName: '', medicines: '', notes: '' };
+                const newRecord = { id: `rx_${Date.now()}`, date: '', doctorName: '', medicines: '', notes: '' };
                 const prescriptions = [...(child.medicalRecords?.prescriptions || []), newRecord];
                 saveChildUpdates({ medicalRecords: { ...child.medicalRecords, prescriptions } });
               }}>
@@ -1126,7 +1434,7 @@ export const ChildProfile: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Immunisation</h3>
               <Button size="sm" onClick={() => {
-                const newRecord = { vaccineName: '', dateGiven: '', nextDueDate: '' };
+                const newRecord = { id: `vac_${Date.now()}`, vaccineName: '', dateGiven: '', nextDueDate: '' };
                 const immunisations = [...(child.medicalRecords?.immunisations || []), newRecord];
                 saveChildUpdates({ medicalRecords: { ...child.medicalRecords, immunisations } });
               }}>
@@ -1175,6 +1483,7 @@ export const ChildProfile: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-4">
               <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Plan Details</h3>
+              <div><Label>Baseline Assessment</Label><Textarea value={child.iepRecords?.baselineAssessment || ''} onChange={e => saveChildUpdates({ iepRecords: { ...child.iepRecords, baselineAssessment: e.target.value } as any })} /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Plan Period From</Label>
@@ -1232,11 +1541,7 @@ export const ChildProfile: React.FC = () => {
                       quarterlyReviews[idx].reviewedBy = e.target.value;
                       saveChildUpdates({ iepRecords: { ...child.iepRecords, quarterlyReviews } as any });
                     }} />
-                    <Input placeholder="Remarks" value={rev.remarks} className="h-6 text-xs p-1" onChange={e => {
-                      const quarterlyReviews = [...(child.iepRecords?.quarterlyReviews || [])];
-                      quarterlyReviews[idx].remarks = e.target.value;
-                      saveChildUpdates({ iepRecords: { ...child.iepRecords, quarterlyReviews } as any });
-                    }} />
+                    <Input placeholder="Remarks" value={rev.remarks} className="h-6 text-xs p-1 mb-2" onChange={e => { const quarterlyReviews = [...(child.iepRecords?.quarterlyReviews || [])]; quarterlyReviews[idx].remarks = e.target.value; saveChildUpdates({ iepRecords: { ...child.iepRecords, quarterlyReviews } as any }); }} /> <Input placeholder="Goal Status" value={rev.goalStatus || ''} className="h-6 text-xs p-1 mb-2" onChange={e => { const quarterlyReviews = [...(child.iepRecords?.quarterlyReviews || [])]; quarterlyReviews[idx].goalStatus = e.target.value; saveChildUpdates({ iepRecords: { ...child.iepRecords, quarterlyReviews } as any }); }} /> <Input placeholder="New Goals" value={rev.newGoals || ''} className="h-6 text-xs p-1" onChange={e => { const quarterlyReviews = [...(child.iepRecords?.quarterlyReviews || [])]; quarterlyReviews[idx].newGoals = e.target.value; saveChildUpdates({ iepRecords: { ...child.iepRecords, quarterlyReviews } as any }); }} />
                   </div>
                 ))}
               </div>
@@ -1304,7 +1609,7 @@ export const ChildProfile: React.FC = () => {
               <div>
                 <Label>Funding Source</Label>
                 <Select 
-                  options={[{label: 'CSR', value: 'CSR'}, {label: 'Government', value: 'Govt'}, {label: 'NGO', value: 'NGO'}, {label: 'Individual Donor', value: 'Donor'}, {label: 'Self', value: 'Self'}]}
+                  options={[{label: 'Vishalwin', value: 'Vishalwin'}, {label: 'CSR', value: 'CSR'}, {label: 'Donor', value: 'Donor'}, {label: 'Parent', value: 'Parent'}, {label: 'Government', value: 'Government'}, {label: 'Crowd Funding', value: 'Crowd Funding'}]}
                   value={child.financialSupport?.fundingSource || ''}
                   onChange={e => saveChildUpdates({ financialSupport: { ...child.financialSupport, fundingSource: e.target.value } as any })}
                 />
@@ -1347,6 +1652,15 @@ export const ChildProfile: React.FC = () => {
                 <Input type="date" value={child.financialSupport?.grantPeriodEnd || ''} onChange={e => saveChildUpdates({ financialSupport: { ...child.financialSupport, grantPeriodEnd: e.target.value } as any })} />
               </div>
             </div>
+            <div className="mt-4">
+              <Label>Support Type</Label>
+              <Select options={['Therapy', 'Education', 'Medicine', 'Travel', 'Assistive Device'].map(o=>({label:o,value:o}))} value={child.financialSupport?.supportType || ''} onChange={e => saveChildUpdates({ financialSupport: { ...child.financialSupport, supportType: e.target.value as any } })} />
+            </div>
+            <div className="mt-4">
+              <Label>Utilization Notes</Label>
+              <Textarea value={child.financialSupport?.utilization || ''} onChange={e => saveChildUpdates({ financialSupport: { ...child.financialSupport, utilization: e.target.value } as any })} />
+            </div>
+
 
             <div className="pt-4 mt-2 border-t border-slate-200">
               <Label>Grant Letter Document</Label>
@@ -1365,7 +1679,7 @@ export const ChildProfile: React.FC = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Assistive Devices</h3>
             <Button size="sm" onClick={() => {
-              const newDevice = { deviceType: 'Wheelchair', brandModel: '', issuedDate: '', warrantyUntil: '', issuedBy: '' };
+              const newDevice = { id: `dev_${Date.now()}`, deviceType: 'Wheelchair' as const, brandModel: '', issuedDate: '', warrantyUntil: '', issuedBy: '' };
               saveChildUpdates({ assistiveDevices: [...(child.assistiveDevices || []), newDevice] });
             }}>
               <Plus className="h-4 w-4 mr-1" /> Add Device
@@ -1453,9 +1767,9 @@ export const ChildProfile: React.FC = () => {
           {/* Counselling Log */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Counselling Log</h3>
+              <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Parent Support Activities</h3>
               <Button size="sm" onClick={() => {
-                const newLog = { type: 'Counselling' as const, date: '', staffName: '', topicOrObservations: '', notesOrRecommendations: '', nextDate: '' };
+                const newLog = { id: `cl_${Date.now()}`, type: 'Counselling' as const, date: '', staffName: '', topicOrObservations: '', notesOrRecommendations: '', nextDate: '' };
                 saveChildUpdates({ homeVisitRecords: [...(child.homeVisitRecords || []), newLog] });
               }}>
                 <Plus className="h-4 w-4 mr-1" /> Add Session
@@ -1476,7 +1790,7 @@ export const ChildProfile: React.FC = () => {
                         }} />
                       </div>
                       <div>
-                        <Label className="text-[10px]">Counsellor Name</Label>
+                        <Label className="text-[10px]">Staff/Counsellor Name</Label>
                         <Input value={log.staffName} onChange={e => {
                           const records = [...(child.homeVisitRecords || [])];
                           records[globalIdx].staffName = e.target.value;
@@ -1519,7 +1833,7 @@ export const ChildProfile: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-slate-900 border-l-4 border-brand-cyan-700 pl-2">Home Visit Log</h3>
               <Button size="sm" onClick={() => {
-                const newLog = { type: 'Home Visit' as const, date: '', staffName: '', topicOrObservations: '', notesOrRecommendations: '', rating: 3, nextDate: '' };
+                const newLog = { id: `hv_${Date.now()}`, type: 'Home Visit' as const, date: '', staffName: '', topicOrObservations: '', notesOrRecommendations: '', rating: 3, nextDate: '' };
                 saveChildUpdates({ homeVisitRecords: [...(child.homeVisitRecords || []), newLog] });
               }}>
                 <Plus className="h-4 w-4 mr-1" /> Add Visit
@@ -1585,6 +1899,23 @@ export const ChildProfile: React.FC = () => {
                           saveChildUpdates({ homeVisitRecords: records });
                         }} />
                       </div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                      <div className="flex items-center">
+                        <input type="checkbox" checked={(log as any).parentCounsellingDone || false} onChange={e => { const records = [...(child.homeVisitRecords || [])]; (records[globalIdx] as any).parentCounsellingDone = e.target.checked; saveChildUpdates({ homeVisitRecords: records }); }} className="mr-2"/>
+                        <Label className="text-[10px] mb-0">Parent Counselling Done</Label>
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">GPS Location</Label>
+                        <div className="flex gap-1">
+                          <Input className="text-[10px] h-7" value={(log as any).gpsLocation || ''} onChange={e => { const records = [...(child.homeVisitRecords || [])]; (records[globalIdx] as any).gpsLocation = e.target.value; saveChildUpdates({ homeVisitRecords: records }); }} />
+                          <Button size="sm" variant="outline" className="px-2 h-7" onClick={() => navigator.geolocation.getCurrentPosition(pos => { const records = [...(child.homeVisitRecords || [])]; (records[globalIdx] as any).gpsLocation = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`; saveChildUpdates({ homeVisitRecords: records }); })}>📍</Button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <Label className="text-[10px]">Photos</Label>
+                      <FakeUpload status={(log as any).photoFileName ? 'Uploaded' : ''} onUpload={(status) => { const records = [...(child.homeVisitRecords || [])]; (records[globalIdx] as any).photoFileName = status; saveChildUpdates({ homeVisitRecords: records }); }} />
+                    </div>
                     </div>
                   </div>
                 );

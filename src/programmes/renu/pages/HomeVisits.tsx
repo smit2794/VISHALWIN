@@ -16,10 +16,13 @@ export const HomeVisits: React.FC = () => {
     childId: '',
     visitDate: new Date().toISOString().split('T')[0],
     visitedBy: '',
-    environmentRating: 3,
+    environmentRating: 'Positive',
     observations: '',
     recommendations: '',
-    nextVisitDate: ''
+    nextVisitDate: '',
+    parentCounsellingDone: false,
+    gpsLocation: '',
+    photoFileName: ''
   });
 
   useEffect(() => {
@@ -70,10 +73,13 @@ export const HomeVisits: React.FC = () => {
         childId: children[0]?.id || '',
         visitDate: new Date().toISOString().split('T')[0],
         visitedBy: '',
-        environmentRating: 3,
+        environmentRating: 'Positive',
         observations: '',
         recommendations: '',
-        nextVisitDate: ''
+        nextVisitDate: '',
+        parentCounsellingDone: false,
+        gpsLocation: '',
+        photoFileName: ''
       });
     }
     setIsModalOpen(true);
@@ -131,11 +137,7 @@ export const HomeVisits: React.FC = () => {
                     <td className="p-4 font-bold">{child?.name || 'Unknown'}</td>
                     <td className="p-4">{v.visitDate}</td>
                     <td className="p-4">{v.visitedBy}</td>
-                    <td className="p-4 flex items-center gap-1">
-                      {Array.from({length: 5}).map((_, i) => (
-                        <Star key={i} className={`h-3 w-3 ${i < v.environmentRating ? 'text-yellow-400 fill-current' : 'text-slate-300'}`} />
-                      ))}
-                    </td>
+                    <td className="p-4">{v.environmentRating}</td>
                     <td className="p-4 truncate max-w-[200px]">{v.observations}</td>
                     <td className="p-4">{v.nextVisitDate || '-'}</td>
                     <td className="p-4 text-right">
@@ -177,8 +179,46 @@ export const HomeVisits: React.FC = () => {
               <Input value={formData.visitedBy} onChange={e => setFormData({...formData, visitedBy: e.target.value})} required />
             </div>
             <div>
-              <Label>Environment Rating (1-5)</Label>
-              <Input type="number" min="1" max="5" value={formData.environmentRating} onChange={e => setFormData({...formData, environmentRating: Number(e.target.value)})} />
+              <Label>Environment Rating</Label>
+              <Select 
+                options={['Positive', 'Negative', 'Scope to Improve'].map(s => ({label: s, value: s}))}
+                value={formData.environmentRating as any}
+                onChange={e => setFormData({...formData, environmentRating: e.target.value as any})}
+              />
+            </div>
+            <div>
+              <Label>Parent Counselling Done?</Label>
+              <div className="flex gap-4 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer text-slate-700">
+                  <input type="checkbox" checked={formData.parentCounsellingDone} onChange={e => setFormData({...formData, parentCounsellingDone: e.target.checked})} className="accent-brand-cyan-700" /> Yes
+                </label>
+              </div>
+            </div>
+            <div>
+              <Label>Photographs</Label>
+              <Button variant="outline" size="sm" className="w-full mt-1 cursor-pointer" type="button" onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.onchange = (e: any) => {
+                  if (e.target.files?.length) {
+                    setFormData({...formData, photoFileName: e.target.files[0].name});
+                  }
+                };
+                input.click();
+              }}>{formData.photoFileName ? 'Uploaded: ' + formData.photoFileName : 'Upload Photo'}</Button>
+            </div>
+            <div>
+              <Label>GPS Location</Label>
+              <div className="flex gap-2">
+                <Input value={formData.gpsLocation} onChange={e => setFormData({...formData, gpsLocation: e.target.value})} className="flex-1" />
+                <Button type="button" variant="outline" size="sm" onClick={() => {
+                  if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                      setFormData({...formData, gpsLocation: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`});
+                    }, () => showToast('Error', 'danger', 'Unable to get location'));
+                  }
+                }}>Use My Location</Button>
+              </div>
             </div>
             <div className="col-span-2">
               <Label>Observations</Label>

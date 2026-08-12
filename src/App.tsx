@@ -19,6 +19,8 @@ import Analytics from './programmes/renu/pages/Analytics';
 import SchoolAdmissions from './programmes/renu/pages/SchoolAdmissions';
 import HomeVisits from './programmes/renu/pages/HomeVisits';
 import MedicalDatabase from './programmes/renu/pages/MedicalDatabase';
+import VolunteerVisits from './programmes/renu/pages/VolunteerVisits';
+import Stakeholders from './programmes/renu/pages/Stakeholders';
 // Shared Pages
 import Settings from './shared/pages/Settings';
 
@@ -68,6 +70,8 @@ export const App: React.FC = () => {
           <Route path="/renu/school-admissions" element={<SchoolAdmissions />} />
           <Route path="/renu/home-visits" element={<HomeVisits />} />
           <Route path="/renu/medical-database" element={<MedicalDatabase />} />
+          <Route path="/renu/volunteer-visits" element={<VolunteerVisits />} />
+          <Route path="/renu/stakeholders" element={<Stakeholders />} />
           {/* Shared Pages (RENU Portal) */}
           <Route path="/renu/settings" element={<Settings />} />
 

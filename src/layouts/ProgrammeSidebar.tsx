@@ -30,6 +30,8 @@ export const ProgrammeSidebar: React.FC<{ onCloseMobile?: () => void }> = ({ onC
       { name: 'Home Visits', path: '/renu/home-visits', icon: <LayoutDashboard className="h-5 w-5" /> },
       { name: 'Diagnosis', path: '/renu/diagnosis', icon: <Activity className="h-5 w-5" /> },
       { name: 'Medical Database', path: '/renu/medical-database', icon: <FileText className="h-5 w-5" /> },
+      { name: 'Volunteer Visits', path: '/renu/volunteer-visits', icon: <Users className="h-5 w-5" /> },
+      { name: 'Stakeholders', path: '/renu/stakeholders', icon: <Building2 className="h-5 w-5" /> },
       { name: 'Therapy Centres', path: '/renu/therapy-centres', icon: <Building2 className="h-5 w-5" /> },
       { name: 'School Admissions', path: '/renu/school-admissions', icon: <GraduationCap className="h-5 w-5" /> },
       { name: 'Sponsorships', path: '/renu/sponsorships', icon: <HandHeart className="h-5 w-5" />, adminOnly: true },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from'react';
+import { useNavigate } from 'react-router-dom';
 import { RenuStore } from'../data/renuStore';
 import { useRole } from'../../../hooks/useRole';
 import { showToast } from'../../../hooks/useToast';
@@ -8,6 +9,7 @@ import { FileText, CheckCircle2, AlertCircle, FileCheck, Stethoscope, Search, Pl
 import EmptyState from'../../../components/common/EmptyState';
 
 export const DiagnosisPage: React.FC = () => {
+ const navigate = useNavigate();
  const { role, isAdmin } = useRole();
  
  // Data States
@@ -31,6 +33,9 @@ export const DiagnosisPage: React.FC = () => {
  certificateAvailable: false,
  assessmentScore: 70,
  outcome:'',
+ primaryDiagnosis: '',
+ secondaryDiagnosis: '',
+ coMorbidities: '',
  fileName:''
  });
 
@@ -100,7 +105,10 @@ export const DiagnosisPage: React.FC = () => {
  certificateAvailable: formData.certificateAvailable,
  medicalReportUrl: formData.fileName ?`/reports/filed_${selectedChild.id}_${formData.fileName}`: undefined,
  assessmentScore: Number(formData.assessmentScore) || 75,
- outcome: formData.outcome ||'Recommended for routine therapy.'
+ outcome: formData.outcome ||'Recommended for routine therapy.',
+ primaryDiagnosis: formData.primaryDiagnosis,
+ secondaryDiagnosis: formData.secondaryDiagnosis,
+ coMorbidities: formData.coMorbidities,
  };
 
  // Save diagnosis
@@ -134,6 +142,9 @@ export const DiagnosisPage: React.FC = () => {
  certificateAvailable: false,
  assessmentScore: 70,
  outcome:'',
+ primaryDiagnosis: '',
+ secondaryDiagnosis: '',
+ coMorbidities: '',
  fileName:''
  });
  setSelectedChild(null);
@@ -251,7 +262,7 @@ export const DiagnosisPage: React.FC = () => {
  <div className="flex justify-between items-start mb-3 border-b border-slate-200 pb-2">
  <div>
  <h3 
- onClick={() => window.location.hash =`#/children/${c.id}`}
+ onClick={() => navigate(`/renu/children/${c.id}`)}
  className="text-xs font-bold text-slate-800 hover:text-brand-cyan-700 hover:underline cursor-pointer"
  >
  {c.name}
@@ -279,6 +290,20 @@ export const DiagnosisPage: React.FC = () => {
  <div>
  <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Clinical Summary</div>
  <p className="text-xs text-slate-700 mt-0.5 leading-relaxed">{diag.assessmentSummary}</p>
+ </div>
+ <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-2 mt-2">
+ <div>
+ <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Primary Diagnosis</div>
+ <p className="text-xs text-slate-700 mt-0.5">{diag.primaryDiagnosis || 'N/A'}</p>
+ </div>
+ <div>
+ <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Secondary</div>
+ <p className="text-xs text-slate-700 mt-0.5">{diag.secondaryDiagnosis || 'N/A'}</p>
+ </div>
+ <div className="col-span-2">
+ <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Co-morbidities</div>
+ <p className="text-xs text-slate-700 mt-0.5">{diag.coMorbidities || 'None'}</p>
+ </div>
  </div>
  <div>
  <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Outcome Recommendation</div>
@@ -433,6 +458,34 @@ export const DiagnosisPage: React.FC = () => {
  value={formData.assessmentSummary}
  onChange={e => setFormData({ ...formData, assessmentSummary: e.target.value })}
  required
+ />
+ </div>
+
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <div>
+ <Label>Primary Diagnosis</Label>
+ <Input
+ placeholder="e.g. Mild Autism"
+ value={formData.primaryDiagnosis}
+ onChange={e => setFormData({ ...formData, primaryDiagnosis: e.target.value })}
+ />
+ </div>
+ <div>
+ <Label>Secondary Diagnosis</Label>
+ <Input
+ placeholder="e.g. Speech Delay"
+ value={formData.secondaryDiagnosis}
+ onChange={e => setFormData({ ...formData, secondaryDiagnosis: e.target.value })}
+ />
+ </div>
+ </div>
+
+ <div>
+ <Label>Co-morbidities</Label>
+ <Input
+ placeholder="e.g. Asthma, Seizures"
+ value={formData.coMorbidities}
+ onChange={e => setFormData({ ...formData, coMorbidities: e.target.value })}
  />
  </div>
 

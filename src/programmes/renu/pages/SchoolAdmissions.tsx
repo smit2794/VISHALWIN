@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from'react';
+import { useNavigate } from 'react-router-dom';
 import { RenuStore } from'../data/renuStore';
 import { useRole } from'../../../hooks/useRole';
 import { showToast } from'../../../hooks/useToast';
@@ -8,6 +9,7 @@ import { GraduationCap, Search, CheckCircle2, AlertCircle, FileCheck, Pencil, Ca
 import EmptyState from'../../../components/common/EmptyState';
 
 export const SchoolAdmissions: React.FC = () => {
+ const navigate = useNavigate();
  const { role } = useRole();
  const [children, setChildren] = useState<Child[]>([]);
  const [search, setSearch] = useState('');
@@ -23,18 +25,22 @@ export const SchoolAdmissions: React.FC = () => {
  const [formData, setFormData] = useState({
  admissionDate: '',
  schoolName: '',
- schoolType: 'Government' as SchoolAdmissionDetails['schoolType'],
+ schoolType: 'Normal School' as SchoolAdmissionDetails['schoolType'],
  mediumOfInstruction: 'English' as SchoolAdmissionDetails['mediumOfInstruction'],
  currentAcademicYear: '',
  transportSupportBusPass: false,
  transportSupportAllowance: 0,
- reportCards: [] as { year: string; grade: string; remarks: string; fileName: string }[],
+ reportCards: [] as { year: string; grade: string; remarks: string; fileName?: string }[],
  standard: '',
  admissionStatus: 'Identified' as SchoolAdmissionDetails['admissionStatus'],
  educationSupport: [] as string[],
  feesSponsored: false,
  feesSponsoredAmount: 0,
- remarks: ''
+ remarks: '',
+ principalName: '',
+ principalContact: '',
+ attendancePercent: 0,
+ teacherFeedback: ''
  });
 
  useEffect(() => {
@@ -72,7 +78,7 @@ export const SchoolAdmissions: React.FC = () => {
  setFormData({
  admissionDate: details.admissionDate || new Date().toISOString().split('T')[0],
  schoolName: details.schoolName || '',
- schoolType: details.schoolType || 'Government',
+ schoolType: details.schoolType || 'Normal School',
  mediumOfInstruction: details.mediumOfInstruction || 'English',
  currentAcademicYear: details.currentAcademicYear || '',
  transportSupportBusPass: details.transportSupportBusPass || false,
@@ -83,7 +89,11 @@ export const SchoolAdmissions: React.FC = () => {
  educationSupport: details.educationSupportProvided || [],
  feesSponsored: details.feesSponsored || false,
  feesSponsoredAmount: details.feesSponsoredAmount || 0,
- remarks: details.remarks || ''
+ remarks: details.remarks || '',
+ principalName: details.principalName || '',
+ principalContact: details.principalContact || '',
+ attendancePercent: details.attendancePercent || 0,
+ teacherFeedback: details.teacherFeedback || ''
  });
  setIsEditOpen(true);
  };
@@ -141,7 +151,11 @@ export const SchoolAdmissions: React.FC = () => {
  educationSupportProvided: formData.educationSupport as any,
  feesSponsored: formData.feesSponsored,
  feesSponsoredAmount: formData.feesSponsored ? Number(formData.feesSponsoredAmount) : 0,
- remarks: formData.remarks || undefined
+ remarks: formData.remarks || undefined,
+ principalName: formData.principalName || undefined,
+ principalContact: formData.principalContact || undefined,
+ attendancePercent: formData.attendancePercent,
+ teacherFeedback: formData.teacherFeedback || undefined
  };
 
  // Update child journey status automatically if confirmed
@@ -271,14 +285,49 @@ export const SchoolAdmissions: React.FC = () => {
  />
  ) : (
  <div className="space-y-4">
- <Card className="overflow-hidden border-slate-205">
+
+ {/* === MOBILE CARD VIEW (hidden on md+) === */}
+ <div className="md:hidden space-y-3">
+ {paginatedPool.map(c => {
+ const status = c.schoolAdmission?.admissionStatus || 'Identified';
+ const statusColor = status === 'Confirmed' ? 'success' : status === 'Applied' ? 'primary' : status === 'Cancelled' ? 'danger' : 'warning';
+ return (
+ <Card key={c.id} className="p-4 space-y-3">
+ <div className="flex justify-between items-start">
+ <div>
+ <span
+ onClick={() => navigate(`/renu/children/${c.id}`)}
+ className="font-bold text-slate-800 hover:text-brand-cyan-700 hover:underline cursor-pointer text-sm"
+ >{c.name}</span>
+ <div className="text-[10px] text-slate-400 mt-0.5">ID: {c.id}</div>
+ </div>
+ <Badge color={statusColor} className="font-bold text-xs">{status}</Badge>
+ </div>
+ <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
+ <div><span className="font-semibold text-slate-500">Age: </span>{c.age} yrs • {c.gender}</div>
+ <div><span className="font-semibold text-slate-500">Class: </span>{c.classification}</div>
+ <div><span className="font-semibold text-slate-500">School: </span>{c.schoolAdmission?.schoolName || '—'}</div>
+ <div><span className="font-semibold text-slate-500">Std: </span>{c.schoolAdmission?.standard || 'N/A'}</div>
+ <div><span className="font-semibold text-slate-500">Admission: </span>{c.schoolAdmission?.admissionDate || 'Pending'}</div>
+ <div><span className="font-semibold text-slate-500">Fees: </span>{c.schoolAdmission?.feesSponsored ? `₹${c.schoolAdmission.feesSponsoredAmount?.toLocaleString()}` : 'None'}</div>
+ </div>
+ <Button variant="secondary" size="sm" onClick={() => handleOpenEdit(c)} className="w-full flex items-center justify-center gap-1 mt-1">
+ <Pencil className="h-3.5 w-3.5" /> Manage
+ </Button>
+ </Card>
+ );
+ })}
+ </div>
+
+ {/* === DESKTOP TABLE VIEW (hidden on mobile) === */}
+ <Card className="hidden md:block overflow-hidden">
  <div className="overflow-x-auto">
  <table className="w-full text-left border-collapse text-xs">
  <thead>
  <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider">
- <th className="p-4">Child ID & Name</th>
- <th className="p-4">Age & Classification</th>
- <th className="p-4">Standard & School Details</th>
+ <th className="p-4">Child ID &amp; Name</th>
+ <th className="p-4">Age &amp; Classification</th>
+ <th className="p-4">Standard &amp; School Details</th>
  <th className="p-4">Fees Sponsored</th>
  <th className="p-4 text-center">Admission Date</th>
  <th className="p-4 text-center">Admission Status</th>
@@ -287,13 +336,13 @@ export const SchoolAdmissions: React.FC = () => {
  </thead>
  <tbody className="divide-y divide-slate-100 text-slate-700">
  {paginatedPool.map(c => {
- const status = c.schoolAdmission?.admissionStatus ||'Identified';
+ const status = c.schoolAdmission?.admissionStatus || 'Identified';
  return (
  <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
  <td className="p-4 font-semibold">
- <span 
- onClick={() => window.location.hash =`#/children/${c.id}`}
- className="font-bold text-slate-800 hover:text-brand-cyan-705 hover:underline cursor-pointer"
+ <span
+ onClick={() => navigate(`/renu/children/${c.id}`)}
+ className="font-bold text-slate-800 hover:text-brand-cyan-700 hover:underline cursor-pointer"
  >
  {c.name}
  </span>
@@ -301,7 +350,7 @@ export const SchoolAdmissions: React.FC = () => {
  </td>
  <td className="p-4">
  <div className="font-semibold text-slate-800">{c.age} years • {c.gender}</div>
- <Badge color={c.classification ==='Special'?'danger':'success'} className="scale-90 origin-left mt-0.5">
+ <Badge color={c.classification === 'Special' ? 'danger' : 'success'} className="scale-90 origin-left mt-0.5">
  {c.classification}
  </Badge>
  </td>
@@ -310,7 +359,7 @@ export const SchoolAdmissions: React.FC = () => {
  <>
  <div className="font-bold text-slate-800">{c.schoolAdmission.schoolName}</div>
  <div className="text-[10px] text-slate-400 mt-0.5">
- Std: {c.schoolAdmission.standard ||'N/A'} ({c.schoolAdmission.schoolType ||'General'})
+ Std: {c.schoolAdmission.standard || 'N/A'} ({c.schoolAdmission.schoolType || 'General'})
  </div>
  </>
  ) : (
@@ -325,14 +374,14 @@ export const SchoolAdmissions: React.FC = () => {
  )}
  </td>
  <td className="p-4 text-center text-slate-800">
- {c.schoolAdmission?.admissionDate ||'Pending'}
+ {c.schoolAdmission?.admissionDate || 'Pending'}
  </td>
  <td className="p-4 text-center">
- <Badge 
+ <Badge
  color={
- status ==='Confirmed'?'success': 
- status ==='Applied'?'primary': 
- status ==='Cancelled'?'danger':'warning'
+ status === 'Confirmed' ? 'success' :
+ status === 'Applied' ? 'primary' :
+ status === 'Cancelled' ? 'danger' : 'warning'
  }
  className="font-bold"
  >
@@ -346,7 +395,7 @@ export const SchoolAdmissions: React.FC = () => {
  onClick={() => handleOpenEdit(c)}
  className="flex items-center gap-1 cursor-pointer ml-auto"
  >
- <Pencil className="h-3.5 w-3.5"/> Manage
+ <Pencil className="h-3.5 w-3.5" /> Manage
  </Button>
  </td>
  </tr>
@@ -407,12 +456,11 @@ export const SchoolAdmissions: React.FC = () => {
  <Label>School Type</Label>
  <Select
  options={[
- { label:'Government', value:'Government'},
- { label:'Private', value:'Private'},
- { label:'Inclusive School', value:'Inclusive'},
- { label:'Special School', value:'Special School'},
- { label:'Home Education', value:'Home Education'},
- { label:'Other', value:'Other'}
+ { label:'Normal School', value:'Normal School'},
+ { label:'Inclusive School', value:'Inclusive School'},
+ { label:'Integrated School', value:'Integrated School'},
+ { label:'Home Schooling', value:'Home Schooling'},
+ { label:'NIOS', value:'NIOS'}
  ]}
  value={formData.schoolType}
  onChange={e => setFormData({ ...formData, schoolType: e.target.value as any })}
@@ -434,6 +482,14 @@ export const SchoolAdmissions: React.FC = () => {
  value={formData.mediumOfInstruction}
  onChange={e => setFormData({ ...formData, mediumOfInstruction: e.target.value as any })}
  />
+ </div>
+ <div>
+ <Label>Principal Name</Label>
+ <Input value={formData.principalName} onChange={e => setFormData({...formData, principalName: e.target.value})} />
+ </div>
+ <div>
+ <Label>Principal Contact</Label>
+ <Input value={formData.principalContact} onChange={e => setFormData({...formData, principalContact: e.target.value})} />
  </div>
  </div>
 
@@ -560,7 +616,17 @@ export const SchoolAdmissions: React.FC = () => {
  </div>
 
  <div>
-    <Label>Report Cards</Label>
+    <Label>Progress / Report Cards</Label>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+        <Label>Attendance %</Label>
+        <Input type="number" min="0" max="100" value={formData.attendancePercent} onChange={e => setFormData({...formData, attendancePercent: Number(e.target.value)})} />
+      </div>
+      <div>
+        <Label>Teacher Feedback</Label>
+        <Input placeholder="Feedback" value={formData.teacherFeedback} onChange={e => setFormData({...formData, teacherFeedback: e.target.value})} />
+      </div>
+    </div>
     <div className="space-y-2 mb-2">
       {formData.reportCards.map((rc, idx) => (
         <div key={idx} className="flex gap-2 items-center p-2 border rounded bg-slate-50">
