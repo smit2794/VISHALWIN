@@ -92,29 +92,91 @@ const CAMP_LOCATIONS = [
 ];
 
 const generateCamps = (coordinators: Coordinator[]): Camp[] => {
- return Array.from({ length: 20 }, (_, i) => {
- const coordIndex = i % coordinators.length;
- const reg = 15 + (i * 3) + (i % 4);
- const spec = Math.floor(reg * (0.2 + (i % 4) * 0.08));
- const norm = reg - spec;
- const fup = Math.floor(spec * 0.9);
+  const VENUE_TYPES: Camp['venueType'][] = ['School', 'Community Hall', 'PHC-CHC-Urban Health Centre', 'NGO', 'Other'];
+  const COVERAGE_AREAS: Camp['coverageArea'][] = ['Village', 'Taluka', 'District', 'Ward', 'Zone'];
+  const COLLAB_TYPES: any[] = ['CSR', 'Venue Partner', 'NGO', 'Community', 'Center'];
+  const MEDICAL_ROLES: any[] = [
+    'Pediatrician', 'Developmental Pediatrician', 'Neurologist', 'Psychiatrist', 'Psychologist',
+    'Occupational Therapist', 'Speech Therapist', 'Physiotherapist', 'Audiologist', 'Vision Expert',
+    'Nutritionist', 'Orthopedic Doctor', 'Prosthetist & Orthotist', 'Special Educator'
+  ];
 
- return {
- id:`CAMP-${300 + i}`,
- name:`RENU Medical Camp - ${AREAS[i % AREAS.length]}`,
- date: getDateAgo(15 * (20 - i)), // Camps conducted over the past 300 days
- location:`${CAMP_LOCATIONS[i % CAMP_LOCATIONS.length]}, ${AREAS[i % AREAS.length]}`,
- area: AREAS[i % AREAS.length],
- city: CITIES[i % CITIES.length],
- coordinatorId: coordinators[coordIndex].id,
- doctorName:`Dr. Amit ${LAST_NAMES[(i + 4) % LAST_NAMES.length]} (Pediatrician)`,
- therapistName:`Therapist Sneha ${LAST_NAMES[(i + 7) % LAST_NAMES.length]}`,
- registeredCount: reg,
- normalCount: norm,
- specialCount: spec,
- followUpsRequiredCount: fup,
- };
- });
+  return Array.from({ length: 20 }, (_, i) => {
+    const coordIndex = i % coordinators.length;
+    const reg = 15 + (i * 3) + (i % 4);
+    const screened = reg;
+    const maleScreened = Math.floor(screened * 0.55);
+    const femaleScreened = screened - maleScreened;
+    const spec = Math.floor(reg * (0.2 + (i % 4) * 0.08));
+    const norm = reg - spec;
+    const fup = Math.floor(spec * 0.9);
+    const area = AREAS[i % AREAS.length];
+    const city = CITIES[i % CITIES.length];
+
+    return {
+      id: `CAMP-${300 + i}`,
+      name: `RENU Medical Camp - ${area}`,
+      campType: i % 2 === 0 ? 'Medical Screening & Assessment Camp' : 'Aids & Appliances Assessment & Distribution Camp',
+      date: getDateAgo(15 * (20 - i)),
+      time: '09:30 AM',
+      duration: '5 Hours',
+      location: `${CAMP_LOCATIONS[i % CAMP_LOCATIONS.length]}, ${area}`,
+      address: `Plot ${10 + i}, Near Primary School, ${area}`,
+      place: `${area}, ${city}`,
+      area: area,
+      city: city,
+      coverageArea: COVERAGE_AREAS[i % COVERAGE_AREAS.length],
+      venueType: VENUE_TYPES[i % VENUE_TYPES.length],
+      coordinatorId: coordinators[coordIndex].id,
+      doctorName: `Dr. Amit ${LAST_NAMES[(i + 4) % LAST_NAMES.length]} (Pediatrician)`,
+      therapistName: `Therapist Sneha ${LAST_NAMES[(i + 7) % LAST_NAMES.length]}`,
+      registeredCount: reg,
+      screenedCount: screened,
+      maleScreenedCount: maleScreened,
+      femaleScreenedCount: femaleScreened,
+      normalCount: norm,
+      specialCount: spec,
+      followUpsRequiredCount: fup,
+      organizer: {
+        isCollaborated: true,
+        collaborationType: COLLAB_TYPES[i % COLLAB_TYPES.length],
+        instituteName: `${COLLAB_TYPES[i % COLLAB_TYPES.length]} Foundation - ${city}`,
+        instituteAddress: `Sector ${i + 1}, Main Road, ${city}`,
+        repName: `Rajesh ${LAST_NAMES[i % LAST_NAMES.length]}`,
+        repDesignation: 'Project Director',
+        repContact: `+91 98200 ${10000 + i}`,
+        repEmail: `contact@collab${i}.org`
+      },
+      teamMembers: [
+        { id: `tm-1-${i}`, role: MEDICAL_ROLES[i % MEDICAL_ROLES.length], name: `Dr. Ramesh ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`, organization: 'City Civil Hospital', mobile: `+91 98111 ${20000 + i}` },
+        { id: `tm-2-${i}`, role: MEDICAL_ROLES[(i + 3) % MEDICAL_ROLES.length], name: `Dr. Sunita ${LAST_NAMES[(i + 2) % LAST_NAMES.length]}`, organization: 'Vishalwin Medical Wing', mobile: `+91 98222 ${20000 + i}` },
+        { id: `tm-3-${i}`, role: 'Coordinator', name: coordinators[coordIndex].name, organization: 'Vishalwin Foundation', mobile: coordinators[coordIndex].mobile },
+        { id: `tm-4-${i}`, role: 'Volunteer', name: `Pooja ${LAST_NAMES[(i + 5) % LAST_NAMES.length]}`, organization: 'Youth NGO Partner', mobile: `+91 98333 ${20000 + i}` }
+      ],
+      iecMaterials: [
+        { id: `iec-1-${i}`, name: 'Awareness Pamphlets', quantity: 200, status: 'Distributed', sampleFileName: 'renu_awareness_pamphlet.pdf' },
+        { id: `iec-2-${i}`, name: 'Disability Screening Banners', quantity: 5, status: 'Ready', sampleFileName: 'camp_disability_banner.png' }
+      ],
+      campDocuments: [
+        { type: 'Permission Letter', fileName: 'govt_permission_letter.pdf' },
+        { type: 'Approval Letter', fileName: 'district_health_approval.pdf' },
+        { type: 'Posters', fileName: 'camp_poster_dharavi.pdf' },
+        { type: 'Registration Sheet', fileName: 'camp_registration_log.pdf' },
+        { type: 'Photos', fileName: 'camp_opening_photos.zip' },
+        { type: 'Parents Feedback', fileName: 'parent_feedback_summary.pdf' }
+      ],
+      followUpSheetFileName: `followup_sheet_camp_${300 + i}.pdf`,
+      expertsAssessmentFileName: `experts_assessment_forms_${300 + i}.pdf`,
+      campFollowUp: {
+        ageBand: i % 3 === 0 ? '0-12' : i % 3 === 1 ? '12-18' : '18+',
+        isDisabilityID: true,
+        referralTherapy: true,
+        referralMedicalTreatment: true,
+        referralGovtScheme: true,
+        referralRenuAdmission: true
+      }
+    };
+  });
 };
 
 // 4. Children
@@ -210,42 +272,103 @@ const generateChildren = (camps: Camp[]): Child[] => {
  admissionStatus: (journeyStatus ==='School Admission'?'Confirmed':'Applied') as any,
  educationSupportProvided: ['Uniforms','Textbooks'] as any,
  feesSponsored: i % 2 === 0,
- feesSponsoredAmount: i % 2 === 0 ? 12000 : 0,
+feesSponsoredAmount: i % 2 === 0 ? 12000 : 0,
  remarks:'Successfully cleared the basic school readiness evaluation checks.'
  } : undefined;
 
  return {
- id:`CHI-${400 + i}`,
- name:`${name} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`,
- photo:`https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`,
- dob,
- age,
- gender: i % 2 === 0 ?'Male': ('Female'as any),
- fatherName:`${FIRST_NAMES_COORD[(i * 3) % FIRST_NAMES_COORD.length]} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`,
- motherName:`${FIRST_NAMES_COORD[(i * 3 + 1) % FIRST_NAMES_COORD.length]} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`,
- mobile:`+91 99887 766${10 + i}`,
- alternateMobile: i % 3 === 0 ?`+91 99887 766${50 + i}`: undefined,
- address:`${101 + i * 3}, Block B, Slum Rehabilitation Colony, ${camp.area}`,
- area: camp.area,
- city: camp.city,
- pincode:`4000${10 + i}`,
- schoolName: isNotEnrolled ? undefined : SCHOOLS[i % SCHOOLS.length],
- currentStandard: isNotEnrolled ? undefined : (age < 6 ?'Nursery': age < 8 ?'1st Std':'2nd Std'),
- isNotEnrolled,
- classification,
- disabilityType,
- severity,
- journeyStatus,
- registeredDate: camp.date,
- campId: camp.id,
- therapyProgressScore,
- documents,
- certificateAvailable: isSpecial && stepIdx >= 4,
- attendanceStatus: i % 5 === 0 ?'Absent':'Present',
- progressHistory,
- schoolAdmission,
- therapyProgress
- };
+    id: `CHI-${400 + i}`,
+    name: `${name} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`,
+    photo: `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`,
+    dob,
+    age,
+    gender: i % 2 === 0 ? 'Male' : ('Female' as any),
+    bloodGroup: ['A+', 'B+', 'O+', 'AB+', 'O-'][i % 5],
+    motherTongue: ['Hindi', 'Marathi', 'Gujarati', 'English', 'Urdu'][i % 5],
+    languageSpokenAtHome: ['Hindi', 'Marathi', 'Gujarati'][i % 3],
+    weightKg: 12 + (i % 8),
+    heightCm: 85 + (i % 25),
+    identificationMark: i % 2 === 0 ? 'Small mole on right cheek' : 'Birthmark on left shoulder',
+    childConditionDescription: 'Child presents mild developmental delay with speech articulation needs. Shows active interest in visual learning.',
+    fatherName: `${FIRST_NAMES_COORD[(i * 3) % FIRST_NAMES_COORD.length]} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`,
+    motherName: `${FIRST_NAMES_COORD[(i * 3 + 1) % FIRST_NAMES_COORD.length]} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`,
+    familyDetails: {
+      father: {
+        name: `${FIRST_NAMES_COORD[(i * 3) % FIRST_NAMES_COORD.length]} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`,
+        education: '10th Pass',
+        occupation: 'Daily Wage Worker',
+        mobile: `+91 99887 766${10 + i}`,
+        isWhatsApp: true
+      },
+      mother: {
+        name: `${FIRST_NAMES_COORD[(i * 3 + 1) % FIRST_NAMES_COORD.length]} ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`,
+        education: '12th Pass',
+        occupation: 'Homemaker',
+        mobile: `+91 99887 766${50 + i}`,
+        isWhatsApp: true
+      },
+      guardian: { name: 'N/A', education: 'N/A', occupation: 'N/A', mobile: '' },
+      annualIncome: 75000 + (i * 5000),
+      bplStatus: true,
+      rationCard: true,
+      familyMembersCount: 4 + (i % 3),
+      socioEconomicStatus: 'Low',
+      siblings: [
+        { name: `Priya ${LAST_NAMES[(i + 1) % LAST_NAMES.length]}`, education: '5th Std', age: 10 + (i % 3), businessOrOccupation: 'Student' }
+      ],
+      otherChildDisability: false,
+      otherChildDisabilityDetails: 'None',
+      consanguineousMarriage: i % 5 === 0,
+      interestedHouseholdMembers: 'Grandmother actively assists with daily exercises',
+      familyType: i % 2 === 0 ? 'Nuclear' : 'Joint',
+      connectedNGOsOrGroups: 'Local Community Welfare Association'
+    },
+    mobile: `+91 99887 766${10 + i}`,
+    alternateMobile: i % 3 === 0 ? `+91 99887 766${50 + i}` : undefined,
+    address: `${101 + i * 3}, Block B, Slum Rehabilitation Colony, ${camp.area}`,
+    area: camp.area,
+    city: camp.city,
+    pincode: `4000${10 + i}`,
+    district: camp.city,
+    registrationSource: 'Medical Camp',
+    schoolName: isNotEnrolled ? undefined : SCHOOLS[i % SCHOOLS.length],
+    currentStandard: isNotEnrolled ? undefined : (age < 6 ? 'Nursery' : age < 8 ? '1st Std' : '2nd Std'),
+    isNotEnrolled,
+    lastSchoolAttended: isNotEnrolled ? 'Municipal Primary School No. 2' : 'N/A',
+    reasonForDropout: isNotEnrolled ? 'Distance to center & financial constraints' : 'N/A',
+    classification,
+    disabilityType,
+    severity,
+    hasEpilepsyAttacks: false,
+    epilepsySinceWhen: 'N/A',
+    karyotypingTestDone: true,
+    karyotypingTestCentre: 'KEM Hospital Genetic Lab, Mumbai',
+    otherMedicalIssuesNotes: 'No cardiac or respiratory complications noted.',
+    medicalCheckupDone: true,
+    medicalCheckupDate: getDateAgo(60 + i),
+    isToiletTrained: 'Yes',
+    specialFootwearSuggested: i % 2 === 0,
+    specialFootwearProcured: i % 2 === 0,
+    journeyStatus,
+    registeredDate: camp.date,
+    registrationPlace: camp.location,
+    campId: camp.id,
+    birthCertificateFileName: `birth_certificate_CHI-${400 + i}.pdf`,
+    aadhaarCardFileName: `aadhaar_card_CHI-${400 + i}.pdf`,
+    disabilityCertificatesFileName: `disability_cert_CHI-${400 + i}.pdf`,
+    healthExpertsReportFileName: `health_experts_report_CHI-${400 + i}.pdf`,
+    psychiatristReportFileName: `psychiatrist_report_CHI-${400 + i}.pdf`,
+    psychologicalReportFileName: `psychological_report_CHI-${400 + i}.pdf`,
+    specialNotes: 'Child responds well to visual aids and sensory play.',
+    verificationDeclarationChecked: true,
+    therapyProgressScore,
+    documents,
+    certificateAvailable: isSpecial && stepIdx >= 4,
+    attendanceStatus: i % 5 === 0 ? 'Absent' : 'Present',
+    progressHistory,
+    schoolAdmission,
+    therapyProgress
+  };
  });
 };
 
@@ -528,17 +651,30 @@ export class RenuStore {
  }
 
  static getCamps(): Camp[] {
- const coords = this.getCoordinators();
- return this.load<Camp[]>('camps', () => generateCamps(coords));
- }
+    const coords = this.getCoordinators();
+    const camps = this.load<Camp[]>('camps', () => generateCamps(coords));
+    // Auto-enrich if cached data is missing new Section A fields
+    if (camps.length > 0 && !camps[0].campType) {
+      const enriched = generateCamps(coords);
+      this.saveCamps(enriched);
+      return enriched;
+    }
+    return camps;
+  }
  static saveCamps(data: Camp[]): void {
  this.save('camps', data);
  }
 
- static getChildren(): Child[] {
- const camps = this.getCamps();
- return this.load<Child[]>('children', () => generateChildren(camps));
- }
+  static getChildren(): Child[] {
+    const camps = this.getCamps();
+    const children = this.load<Child[]>('children', () => generateChildren(camps));
+    if (children.length > 0 && !children[0].motherTongue) {
+      const enriched = generateChildren(camps);
+      this.saveChildren(enriched);
+      return enriched;
+    }
+    return children;
+  }
  static saveChildren(data: Child[]): void {
  this.save('children', data);
  }

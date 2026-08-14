@@ -83,6 +83,7 @@ export interface CampTeamMember {
   id: string;
   role: CampTeamRole;
   name: string;
+  organization?: string;
   mobile: string;
 }
 
@@ -190,11 +191,19 @@ export type RegistrationSource =
 
 export type SocioEconomicStatus = 'Low' | 'Lower Middle' | 'Middle' | 'Upper';
 
+export interface SiblingInfo {
+  name: string;
+  education?: string;
+  age?: number;
+  businessOrOccupation?: string;
+}
+
 export interface ParentDetails {
   name?: string;
   education?: string;
   occupation?: string;
   mobile?: string;
+  isWhatsApp?: boolean;
 }
 
 export interface FamilyDetails {
@@ -206,6 +215,14 @@ export interface FamilyDetails {
   rationCard?: boolean;
   familyMembersCount?: number;
   socioEconomicStatus?: SocioEconomicStatus;
+  // Section B Extended Family Details (Points 32-38)
+  siblings?: SiblingInfo[];
+  otherChildDisability?: boolean;
+  otherChildDisabilityDetails?: string;
+  consanguineousMarriage?: boolean;
+  interestedHouseholdMembers?: string;
+  familyType?: 'Nuclear' | 'Joint' | 'Single Parent';
+  connectedNGOsOrGroups?: string;
 }
 
 export interface EmergencyContact {
@@ -226,11 +243,13 @@ export type EnrollmentStatus =
 
 export interface EnrollmentDetails {
   admissionDate?: string;
+  currentStatus?: EnrollmentStatus;
+  assignedCoordinator?: string;
+  annualRenewalDate?: string;
   admissionFormFileName?: string;
   consentFormFileName?: string;
   parentConsentFileName?: string;
   sponsorshipStatus?: string;
-  currentStatus?: EnrollmentStatus;
   reasonForExit?: string;
 }
 
@@ -249,14 +268,17 @@ export type AssessmentType =
   | 'ADL';
 
 export interface AssessmentRecord {
+  id?: string;
   type: AssessmentType;
   date?: string;
   toolUsed?: string;
   score?: number;
+  category?: string;
   finding?: string;
   conductedBy?: string;
   remarks?: string;
   reportFileName?: string;
+  nextAssessmentDueDate?: string;
 }
 
 // ── Section F: Therapy Management ────────────────────────────
@@ -345,11 +367,13 @@ export interface SchoolAdmissionDetails {
   admissionDate?: string;
   schoolName?: string;
   schoolType?: EducationType;
+  schoolAddress?: string;
   mediumOfInstruction?: 'English' | 'Hindi' | 'Gujarati' | 'Marathi' | 'Other';
   currentAcademicYear?: string;
   standard?: string;
   principalName?: string;
   principalContact?: string;
+  educationCategory?: 'Inclusive Education' | 'Special School';
   transportSupportBusPass?: boolean;
   transportSupportAllowance?: number;
   attendancePercent?: number;
@@ -391,8 +415,10 @@ export interface PrescriptionRecord {
   id?: string;
   date?: string;
   doctorName?: string;
+  hospitalName?: string;
   medicines?: string;
   notes?: string;
+  prescriptionDocumentStatus?: string;
 }
 
 export interface ImmunisationRecord {
@@ -460,12 +486,14 @@ export interface FinancialSupport {
   fundingSource?: FinancialFundingSource;
   amountSanctioned?: number;
   amountReceived?: number;
+  approvalStatus?: 'Pending' | 'Approved' | 'Sanctioned' | 'Rejected';
   donorName?: string;
   contactPerson?: string;
   contactMobile?: string;
   grantPeriodStart?: string;
   grantPeriodEnd?: string;
   utilization?: string;
+  billsFileName?: string;
   grantLetterFileName?: string;
   receiptFileName?: string;
   documentStatus?: string;
@@ -506,9 +534,10 @@ export type MilestoneDomain =
   | 'School Admission'
   | 'Employment';
 
-export type MilestoneProgress = 'Not Started' | 'In Progress' | 'Achieved';
+export type MilestoneProgress = 'Not Started' | 'In Progress' | 'Achieved' | 'Needs Improvement';
 
 export interface DevelopmentalMilestone {
+  id?: string;
   domain: MilestoneDomain;
   progress: MilestoneProgress;
   remarks?: string;
@@ -537,6 +566,7 @@ export interface ParentSupportRecord {
 
 export interface ParentSupport {
   activities?: ParentSupportRecord[];
+  feedbackNotes?: string;
   audioFeedbackFileName?: string;
   videoFeedbackFileName?: string;
   consentStatus?: boolean;
@@ -588,7 +618,8 @@ export type StakeholderCategory =
   | 'Government Departments'
   | 'CSR Partners'
   | 'Donors'
-  | 'Volunteers';
+  | 'Volunteers'
+  | 'Store';
 
 export interface Stakeholder {
   id: string;
@@ -621,7 +652,7 @@ export interface MockDocument {
 export interface Child {
   id: string;
   name: string;
-  // Section B Demographics
+  // Section B Demographics & Physical (Points 8-14, 18, 19, 22-27, 39, 44, 46)
   photo?: string;
   dob: string;
   age: number;
@@ -631,6 +662,12 @@ export interface Child {
   religion?: string;
   district?: string;
   registrationSource?: RegistrationSource;
+  motherTongue?: string;
+  languageSpokenAtHome?: string;
+  weightKg?: number;
+  heightCm?: number;
+  identificationMark?: string;
+  childConditionDescription?: string;
   // Legacy single fields (kept for backwards compat)
   fatherName: string;
   motherName: string;
@@ -647,6 +684,9 @@ export interface Child {
   schoolName?: string;
   currentStandard?: string;
   isNotEnrolled?: boolean;
+  // Section B Schooling History (Point 19)
+  lastSchoolAttended?: string;
+  reasonForDropout?: string;
   // Classification & Disability
   classification: 'Normal' | 'Special';
   disabilityType?: DisabilityType;
@@ -654,14 +694,32 @@ export interface Child {
   secondaryDiagnosis?: string;
   coMorbidities?: string;
   severity?: SeverityLevel;
+  // Section B Medical & Therapy Checks (Points 18, 22, 23, 24, 26, 27)
+  hasEpilepsyAttacks?: boolean;
+  epilepsySinceWhen?: string;
+  karyotypingTestDone?: boolean;
+  karyotypingTestCentre?: string;
+  otherMedicalIssuesNotes?: string;
+  medicalCheckupDone?: boolean;
+  medicalCheckupDate?: string;
+  isToiletTrained?: 'Yes' | 'No' | 'Partial';
+  specialFootwearSuggested?: boolean;
+  specialFootwearProcured?: boolean;
   // Journey
   journeyStatus: ChildJourneyStatus;
   registeredDate: string;
+  registrationPlace?: string;
   campId?: string;
-  // Required Documents (Section B)
+  // Required & Special Documents (Section B Points 15, 16, 17, 42, 43)
   birthCertificateFileName?: string;
   aadhaarCardFileName?: string;
   disabilityCertificatesFileName?: string;
+  healthExpertsReportFileName?: string;
+  psychiatristReportFileName?: string;
+  psychologicalReportFileName?: string;
+  // Section B Special Notes & Declaration (Points 39, 44)
+  specialNotes?: string;
+  verificationDeclarationChecked?: boolean;
   // Legacy documents
   documents?: MockDocument[];
   certificateAvailable?: boolean;
@@ -688,6 +746,8 @@ export interface Child {
   parentSupport?: ParentSupport;
   // Section O: Home Visit records (per-child)
   homeVisitRecords?: HomeVisitRecord[];
+  // Section P: Volunteer & Field Visit records
+  volunteerVisits?: VolunteerVisit[];
   // Section J: Government Benefits (structured)
   govtBenefits?: GovtBenefits;
   // Legacy govt benefit fields (kept for backwards compat)

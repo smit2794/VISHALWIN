@@ -39,6 +39,7 @@ export const SchoolAdmissions: React.FC = () => {
  remarks: '',
  principalName: '',
  principalContact: '',
+ schoolAddress: '',
  attendancePercent: 0,
  teacherFeedback: ''
  });
@@ -92,6 +93,7 @@ export const SchoolAdmissions: React.FC = () => {
  remarks: details.remarks || '',
  principalName: details.principalName || '',
  principalContact: details.principalContact || '',
+ schoolAddress: details.schoolAddress || '',
  attendancePercent: details.attendancePercent || 0,
  teacherFeedback: details.teacherFeedback || ''
  });
@@ -141,6 +143,7 @@ export const SchoolAdmissions: React.FC = () => {
  admissionDate: formData.admissionDate,
  schoolName: formData.schoolName || undefined,
  schoolType: formData.schoolType,
+ schoolAddress: formData.schoolAddress || undefined,
  mediumOfInstruction: formData.mediumOfInstruction,
  currentAcademicYear: formData.currentAcademicYear,
  transportSupportBusPass: formData.transportSupportBusPass,
@@ -466,6 +469,15 @@ export const SchoolAdmissions: React.FC = () => {
  onChange={e => setFormData({ ...formData, schoolType: e.target.value as any })}
  />
  </div>
+ </div>
+
+ <div>
+ <Label>School Address</Label>
+ <Input
+ placeholder="e.g. Sector 4, MG Road, Mumbai"
+ value={formData.schoolAddress}
+ onChange={e => setFormData({ ...formData, schoolAddress: e.target.value })}
+ />
  </div>
 
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

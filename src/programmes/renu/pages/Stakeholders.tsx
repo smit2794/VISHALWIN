@@ -13,7 +13,8 @@ const CATEGORIES: StakeholderCategory[] = [
   'Government Departments',
   'CSR Partners',
   'Donors',
-  'Volunteers'
+  'Volunteers',
+  'Store'
 ];
 
 export const Stakeholders: React.FC = () => {
